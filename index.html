@@ -297,7 +297,7 @@ input.np,select.np{padding-left:9px;}
     <div class="card"><div class="card-hdr"><h3>Achievement % by Slab</h3><span class="tag">YTD</span><button class="chart-dl" onclick="dlChart('pf-ach','Achievement_by_Slab')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="pf-ach"></canvas></div></div></div>
     <div class="card"><div class="card-hdr"><h3>Achievement Gradient — Slab Comparison</h3><span class="tag">Higher completion = higher performance?</span><button class="chart-dl" onclick="dlChart('pf-gradient','Gradient')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="pf-gradient"></canvas></div></div></div>
   </div>
-  <div class="card"><div class="card-hdr"><h3>Pre vs Post Training — Avg Disbursement / Employee (INR L)</h3><span class="tag" id="pf-m0-tag">Select M0</span><button class="chart-dl" onclick="dlChart('pf-prepost','Pre_Post')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="pf-prepost"></canvas></div></div></div>
+  <div class="card"><div class="card-hdr"><h3>Pre vs Post Training — Avg Disbursement / Employee (INR '000)</h3><span class="tag" id="pf-m0-tag">Select M0</span><button class="chart-dl" onclick="dlChart('pf-prepost','Pre_Post')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="pf-prepost"></canvas></div></div></div>
   <div class="card"><div class="card-hdr"><h3>Performance Table</h3></div><div class="card-body" style="padding:0"><table class="data-table" id="pf-table"></table></div></div>
 </div>
 
@@ -336,7 +336,7 @@ input.np,select.np{padding-left:9px;}
 
 <!-- MONTHLY TREND VIEW -->
 <div class="view" id="view-trend">
-  <div class="pg-title"><h2>Monthly Disbursement Trend</h2><p>Avg disbursement per employee — month on month from uploaded S4 data</p></div>
+  <div class="pg-title"><h2>Monthly Disbursement Trend</h2><p>Avg disbursement per employee (INR '000) — month on month from uploaded S4 data</p></div>
   <div class="itabs" id="trend-tabs">
     <button class="itab active" onclick="showTrend('overall',this)">Overall avg</button>
     <button class="itab" onclick="showTrend('s0',this)">0–30%</button>
@@ -418,13 +418,18 @@ function handleFile(file){
     try{
       const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
       parseWorkbook(wb);
-      showStatus(`✓ File loaded successfully — ${DB.branches.length} branches, ${DB.months.length} months of data`,'success');
+      showStatus(`✓ File loaded — ${DB.branches.length} branches, ${DB.months.length} months (${DB.months[0]} to ${DB.months[DB.months.length-1]})`,'success');
       buildMonthDropdown();
+      // Auto-select middle month as default M0 suggestion
+      const midIdx=Math.floor(DB.months.length/2);
+      document.getElementById('d-m0-month').value=String(midIdx);
+      DB.m0Index=midIdx;
       showPreview();
       document.getElementById('generate-btn').disabled=false;
-      document.getElementById('generate-btn').textContent='Generate Dashboard →';
+      document.getElementById('generate-btn').textContent='→ Generate Dashboard';
       setSaveDot(true);
       autoSave();
+      toast('✓ '+DB.branches.length+' branches loaded. Set your 3 fields and click Generate.');
     }catch(err){
       showStatus('Error reading file: '+err.message,'error');
       console.error(err);
@@ -434,84 +439,77 @@ function handleFile(file){
 }
 
 function parseWorkbook(wb){
-  // ── Parse Output Sheet ────────────────────────────────────────────────────
+  // ── EXACT COLUMN MAP for Output - ROI Summary ─────────────────────────────
+  // Row 3 (index 2) = headers
+  // Col 0=SN, 1=Branch, 2=Region, 3=No.of Employees, 4=Avg Monthly Salary
+  // Col 5=0%-30%, 6=30%-50%, 7=50%-75%, 8=>75%
+  // Col 9=Avg Target Ach%, 10=Ach0-30, 11=Ach30-50, 12=Ach50-75, 13=Ach>75
+
   const outSheet=wb.Sheets['Output - ROI Summary'];
-  if(!outSheet)throw new Error('Sheet "Output - ROI Summary" not found. Please check your file.');
+  if(!outSheet)throw new Error('Sheet "Output - ROI Summary" not found.');
 
   const outData=XLSX.utils.sheet_to_json(outSheet,{header:1,defval:null});
   DB.branches=[];
   DB.exits={total:0,s0:0,s1:0,s2:0,s3:0};
 
-  // Find header row (row with 'Branch')
-  let hdrRow=-1;
-  for(let i=0;i<outData.length;i++){
-    if(outData[i]&&outData[i].some&&outData[i].some(c=>String(c||'').toLowerCase().includes('branch'))){hdrRow=i;break;}
-  }
-  if(hdrRow<0)throw new Error('Could not find header row in Output sheet');
-
-  const headers=outData[hdrRow].map(h=>String(h||'').toLowerCase().trim());
-  const col=(name)=>headers.findIndex(h=>h.includes(name));
-  const branchCol=col('branch');
-  const regionCol=col('region');
-  const empCol=headers.findIndex(h=>h.includes('employee')||h.includes('emp'));
-  const salCol=headers.findIndex(h=>h.includes('salary'));
-  const s0Col=col('0');
-  const s1Col=col('30-50')||col('30–50');
-  const s2Col=col('50-75')||col('50–75');
-  const s3Col=col('>75')||col('75');
-  const achCol=headers.findIndex(h=>h.includes('avg target')||h.includes('avg ach'));
-
-  // Find bucket-wise ach cols (columns 10-13 roughly)
-  // Pattern: after overall ach, there are 4 slab-wise ach cols
-  const achCols=[];
-  for(let i=achCol+1;i<Math.min(achCol+6,headers.length);i++){
-    if(headers[i]&&(headers[i].includes('0-30')||headers[i].includes('30-50')||headers[i].includes('50-75')||headers[i].includes('75')||headers[i].includes('learner')||headers[i].includes('ach')))achCols.push(i);
-    if(achCols.length>=4)break;
-  }
-  // fallback: take next 4 after achCol
-  if(achCols.length<4)for(let i=achCol+1;achCols.length<4&&i<headers.length;i++)achCols.push(i);
-
-  for(let i=hdrRow+1;i<outData.length;i++){
+  // Data rows start at index 3 (row 4), stop at TOTAL or blank SN
+  for(let i=3;i<outData.length;i++){
     const row=outData[i];
-    if(!row||!row[branchCol]||String(row[branchCol]).toUpperCase().includes('TOTAL'))continue;
-    if(String(row[branchCol]||'').toUpperCase().includes('EXIT'))break;
-    const branch=String(row[branchCol]||'').trim();
-    if(!branch)continue;
+    if(!row)continue;
+    const sn=row[0];
+    const branch=String(row[1]||'').trim();
+    // Stop at TOTAL row or empty branch
+    if(!branch||String(branch).toUpperCase().includes('TOTAL'))break;
+    // Skip non-numeric SN rows (section headers)
+    if(sn===null||sn===undefined||isNaN(parseFloat(sn)))continue;
+
+    const rawSalary=parseFloat(row[4])||0;
+    // Excel serial dates are ~45000+ for 2023-2025 dates — salary should be much higher
+    // If value is suspiciously low (like a serial date number), it means sheet was saved without recalculation
+    const salary=rawSalary>1000&&rawSalary<500000?rawSalary:0;
     DB.branches.push({
       branch,
-      region:String(row[regionCol]||'Uttar Pradesh').trim(),
-      emp:parseFloat(row[empCol])||0,
-      salary:parseFloat(row[salCol])||0,
-      s0:parseFloat(row[s0Col])||0,
-      s1:parseFloat(row[s1Col])||0,
-      s2:parseFloat(row[s2Col])||0,
-      s3:parseFloat(row[s3Col])||0,
-      achOverall:parseFloat(row[achCol])||0,
-      ach0:parseFloat(row[achCols[0]])||0,
-      ach1:parseFloat(row[achCols[1]])||0,
-      ach2:parseFloat(row[achCols[2]])||0,
-      ach3:parseFloat(row[achCols[3]])||0,
+      region:String(row[2]||'').trim(),
+      emp:parseFloat(row[3])||0,
+      salary,
+      s0:parseFloat(row[5])||0,
+      s1:parseFloat(row[6])||0,
+      s2:parseFloat(row[7])||0,
+      s3:parseFloat(row[8])||0,
+      achOverall:parseFloat(row[9])||0,
+      ach0:parseFloat(row[10])||0,
+      ach1:parseFloat(row[11])||0,
+      ach2:parseFloat(row[12])||0,
+      ach3:parseFloat(row[13])||0,
     });
   }
 
-  // Parse exits section
-  for(let i=hdrRow+1;i<outData.length;i++){
+  if(!DB.branches.length)throw new Error('No branch data found in Output sheet. Check the file format.');
+
+  // ── Parse Exits section ───────────────────────────────────────────────────
+  // Look for row where col[0]='Count' — exits data is in cols 1-5
+  for(let i=0;i<outData.length;i++){
     const row=outData[i];
     if(!row)continue;
-    const rowStr=row.map(c=>String(c||'')).join(' ').toLowerCase();
-    if(rowStr.includes('count')||rowStr.includes('exit')){
-      const numCells=row.filter(c=>typeof c==='number'&&c>0);
-      if(numCells.length>=5){
-        DB.exits.total=numCells[0]||0;
-        DB.exits.s0=numCells[1]||0;
-        DB.exits.s1=numCells[2]||0;
-        DB.exits.s2=numCells[3]||0;
-        DB.exits.s3=numCells[4]||0;
-      }
+    if(String(row[0]||'').toLowerCase().trim()==='count'){
+      DB.exits.total=parseFloat(row[1])||0;
+      DB.exits.s0=parseFloat(row[2])||0;
+      DB.exits.s1=parseFloat(row[3])||0;
+      DB.exits.s2=parseFloat(row[4])||0;
+      DB.exits.s3=parseFloat(row[5])||0;
+      break;
     }
   }
 
-  // ── Parse S4 Productivity ─────────────────────────────────────────────────
+  // ── EXACT COLUMN MAP for S4 - Productivity ───────────────────────────────
+  // Row 2 (index 1): col0=title, cols 6,8,10,12,14,16,18,20,22,24,26,28=months, 30=YTD
+  // Row 3 (index 2): SN,EmpID,Name,Branch,Region,DOJ, then Target/Disb pairs
+  // Data rows: index 3 onwards
+  // Month cols: Apr-25=6, May-25=8, Jun-25=10, Jul-25=12, Aug-25=14,
+  //             Sep-25=16, Oct-25=18, Nov-25=20, Dec-25=22, Jan-26=24,
+  //             Feb-26=26, Mar-26=28
+  // Disb cols = month col + 1
+
   const s4Sheet=wb.Sheets['S4 - Productivity'];
   if(!s4Sheet){toast('⚠ S4 sheet not found — monthly trend unavailable');return;}
 
@@ -519,96 +517,56 @@ function parseWorkbook(wb){
   DB.months=[];
   DB.monthlyData={};
 
-  // Row 1 has month headers (merged), Row 2 has Target/Disb pairs, Row 3 is sub-header
-  // Find month row
-  let monthRow=-1,dataHdrRow=-1;
-  for(let i=0;i<Math.min(10,s4Data.length);i++){
-    const row=s4Data[i];
-    if(!row)continue;
-    const hasMonth=row.some(c=>c&&String(c).match(/[A-Za-z]{3}-\d{2}/));
-    if(hasMonth){monthRow=i;break;}
-  }
-
-  // Build month list from month row
+  // Build month map from row index 1 (second row)
   const monthCols={}; // {monthLabel: {tgtCol, disbCol}}
-  if(monthRow>=0){
-    const mrow=s4Data[monthRow];
-    const prow=s4Data[monthRow+1]||[];
-    for(let c=0;c<mrow.length;c++){
-      const cell=mrow[c];
-      if(cell&&String(cell).match(/[A-Za-z]{3}-\d{2}/)){
-        const mLabel=String(cell).trim();
-        // Next row should have Target/Disb for this and next col
-        const p1=String(prow[c]||'').toLowerCase();
-        const p2=String(prow[c+1]||'').toLowerCase();
-        if(p1.includes('target')||p1.includes('tgt')){
-          monthCols[mLabel]={tgtCol:c,disbCol:c+1};
-          if(!DB.months.includes(mLabel))DB.months.push(mLabel);
-        }
-      }
+  const monthRow=s4Data[1]||[];
+  for(let c=0;c<monthRow.length;c++){
+    const cell=monthRow[c];
+    if(cell&&String(cell).match(/^[A-Za-z]{3}-\d{2}$/)){
+      const mLabel=String(cell).trim();
+      monthCols[mLabel]={tgtCol:c,disbCol:c+1};
+      if(!DB.months.includes(mLabel))DB.months.push(mLabel);
     }
   }
 
-  // Data starts at row after sub-headers (usually row 3 = index 3)
-  dataHdrRow=monthRow+2;
-
-  // We need bucket info from S2 — but S2 may not be in this file
-  // Use emp bucket from completion % if S2 is present, else treat all as unknown
-  // Check if S2 exists
+  // ── Parse S2 for emp buckets ──────────────────────────────────────────────
+  // S2 header at row index 2: col1=EmpID, col13=EmpBucket, col14=FirstInactiveFlag
   const s2Sheet=wb.Sheets['S2 - Course Completion'];
   const empBuckets={}; // {empId: bucket}
   if(s2Sheet){
     const s2Data=XLSX.utils.sheet_to_json(s2Sheet,{header:1,defval:null});
-    // Find emp ID and bucket cols
-    let s2Hdr=-1;
-    for(let i=0;i<Math.min(10,s2Data.length);i++){
-      if(s2Data[i]&&s2Data[i].some(c=>String(c||'').toLowerCase().includes('emp id')||String(c||'').toLowerCase().includes('emp id'))){s2Hdr=i;break;}
-    }
-    if(s2Hdr>=0){
-      const s2Headers=s2Data[s2Hdr].map(h=>String(h||'').toLowerCase());
-      const eidC=s2Headers.findIndex(h=>h.includes('emp id')||h.includes('employee code')||h.includes('emp id'));
-      const bucC=s2Headers.findIndex(h=>h.includes('bucket')||h.includes('emp bucket'));
-      if(eidC>=0&&bucC>=0){
-        for(let i=s2Hdr+1;i<s2Data.length;i++){
-          const r=s2Data[i];
-          if(!r||!r[eidC])continue;
-          const eid=String(r[eidC]).trim();
-          const buc=String(r[bucC]||'').trim();
-          if(eid&&buc)empBuckets[eid]=buc;
-        }
-      }
+    // Data from row index 3 onwards
+    // Col 1=EmpID, Col 13=EmpBucket, Col 14=FirstInactiveFlag
+    for(let i=3;i<s2Data.length;i++){
+      const r=s2Data[i];
+      if(!r||!r[1])continue;
+      const eid=String(r[1]).trim();
+      const buc=String(r[13]||'').trim();
+      if(eid&&buc&&!empBuckets[eid])empBuckets[eid]=buc;
     }
   }
 
-  // Parse S4 data rows
-  // S4 headers: SN, EmpID, Name, Branch, Region, DOJ, then month pairs
-  const s4Hdr=s4Data[dataHdrRow-1]||[];
-  const s4h=s4Hdr.map(h=>String(h||'').toLowerCase());
-  const eidC=s4h.findIndex(h=>h.includes('emp id')||h.includes('employee id')||h==='emp id');
-  const nameC=s4h.findIndex(h=>h.includes('name'));
-  const branchC=s4h.findIndex(h=>h.includes('branch'));
-  const salaryC=s4h.findIndex(h=>h.includes('salary')||h.includes('g. salary'));
-
-  for(let i=dataHdrRow;i<s4Data.length;i++){
+  // ── Parse S4 data rows ────────────────────────────────────────────────────
+  // Col 0=SN, 1=EmpID, 2=Name, 3=Branch, 4=Region, 5=DOJ
+  // Then Target/Disb pairs from col 6 onwards per month
+  for(let i=3;i<s4Data.length;i++){
     const row=s4Data[i];
-    if(!row||!row[eidC])continue;
-    const empId=String(row[eidC]).trim();
-    const branch=String(row[branchC]||'').trim();
+    if(!row||!row[1])continue;
+    const empId=String(row[1]).trim();
+    const branch=String(row[3]||'').trim();
     if(!empId||!branch)continue;
 
     const bucket=empBuckets[empId]||'unknown';
     const monthly=DB.months.map(m=>{
       const mc=monthCols[m];
       if(!mc)return{month:m,tgt:0,disb:0};
-      return{month:m,tgt:parseFloat(row[mc.tgtCol])||0,disb:parseFloat(row[mc.disbCol])||0};
+      const tgt=parseFloat(row[mc.tgtCol])||0;
+      const disb=parseFloat(row[mc.disbCol])||0;
+      return{month:m,tgt,disb};
     });
 
     if(!DB.monthlyData[branch])DB.monthlyData[branch]={};
     DB.monthlyData[branch][empId]={empId,bucket,monthly};
-
-    // Update branch salary from S4 if not set
-    const br=DB.branches.find(b=>b.branch===branch);
-    if(br&&row[salaryC]&&!br.salary)br.salary=parseFloat(row[salaryC])||0;
   }
 
   computeSlabMonthly();
@@ -756,7 +714,7 @@ function refreshPerformance(){
 
   // Performance table
   const t=document.getElementById('pf-table');
-  t.innerHTML=`<thead><tr><th>Slab</th><th class="num">Emp</th><th class="num">Achievement %</th><th class="num">Pre Disb (L)</th><th class="num">Post Disb (L)</th><th class="num">Delta</th><th class="num">Exits</th></tr></thead><tbody>`;
+  t.innerHTML=`<thead><tr><th>Slab</th><th class="num">Emp</th><th class="num">Achievement %</th><th class="num">Pre Disb (₹'000)</th><th class="num">Post Disb (₹'000)</th><th class="num">Delta</th><th class="num">Exits</th></tr></thead><tbody>`;
   const slabs=[{k:'s0',t:tots.s0},{k:'s1',t:tots.s1},{k:'s2',t:tots.s2},{k:'s3',t:tots.s3}];
   slabs.forEach((s,i)=>{
     const pre=pp?parseFloat((pp[['s0','s1','s2','s3'][i]].pre||0).toFixed(2)):0;
@@ -787,8 +745,8 @@ function refreshROI(){
     const ti=slabFee+timeCost;
     const pre=pp?pp[['s0','s1','s2','s3'][i]].pre:0;
     const post=pp?pp[['s0','s1','s2','s3'][i]].post:0;
-    // convert INR L to INR for calculation
-    const pg=emp*(post-pre)*100000*12;
+    // Values in S4 are INR Thousands — multiply by 1000 for INR
+    const pg=emp*(post-pre)*1000*12;
     const as=s.t.exit*repl;
     const tr=pg+as+(totalEmp>0?(emp/totalEmp)*optSavings:0);
     const roi=ti>0?Math.round((tr-ti)/ti*100):0;
@@ -885,7 +843,7 @@ function rebuildTrend(){
   const bgs={overall:'rgba(11,31,58,.06)',s0:'rgba(232,76,61,.1)',s1:'rgba(232,148,61,.1)',s2:'rgba(61,155,232,.1)',s3:'rgba(26,122,74,.1)'};
   const data=DB.slabMonthly[currentTrend];
 
-  mkChart('trend-chart','line',{labels,datasets:[{label:'Avg Disb (INR L)',data,borderColor:colors[currentTrend],backgroundColor:bgs[currentTrend],tension:.4,fill:true,pointRadius:4,pointBackgroundColor:colors[currentTrend],spanGaps:true}]},{scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}}},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
+  mkChart('trend-chart','line',{labels,datasets:[{label:"Avg Disb (INR '000)",data,borderColor:colors[currentTrend],backgroundColor:bgs[currentTrend],tension:.4,fill:true,pointRadius:4,pointBackgroundColor:colors[currentTrend],spanGaps:true}]},{scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}}},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
 
   // All slabs comparison
   mkChart('trend-all','line',{labels,datasets:['overall','s0','s1','s2','s3'].map((k,i)=>({
@@ -899,7 +857,7 @@ function rebuildTrend(){
 
   // Trend table
   const t=document.getElementById('trend-table');
-  t.innerHTML=`<thead><tr><th>Month</th><th class="num">Overall</th><th class="num" style="color:#E84C3D">0–30%</th><th class="num" style="color:#E8943D">30–50%</th><th class="num" style="color:#3D9BE8">50–75%</th><th class="num" style="color:#1A7A4A">>75%</th></tr></thead><tbody>`;
+  t.innerHTML=`<thead><tr><th>Month</th><th class="num">Overall (₹'000)</th><th class="num" style="color:#E84C3D">0–30%</th><th class="num" style="color:#E8943D">30–50%</th><th class="num" style="color:#3D9BE8">50–75%</th><th class="num" style="color:#1A7A4A">>75%</th></tr></thead><tbody>`;
   DB.months.forEach((m,i)=>{
     const off=i-m0;const lbl=off<0?`M${off}`:off===0?'M0 (Training)':(`M+${off}`);
     const style=off===0?'background:var(--orange-lt);font-weight:600':'';
@@ -1045,7 +1003,7 @@ async function dlExecPDF(){
   // Trend chart
   try{
     const tc=document.getElementById('trend-chart');
-    if(tc){const img=tc.toDataURL('image/png');ty+=6;pdf.setTextColor(11,31,58);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('Monthly Disbursement Trend',14,ty);pdf.addImage(img,'PNG',14,ty+3,pw-28,45);ty+=50;}
+    if(tc){const img=tc.toDataURL('image/png');ty+=6;pdf.setTextColor(11,31,58);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text("Monthly Disbursement Trend (INR '000)",14,ty);pdf.addImage(img,'PNG',14,ty+3,pw-28,45);ty+=50;}
   }catch(e){}
 
   // Footer
