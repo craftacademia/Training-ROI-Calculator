@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRAFT ROI Tracker v5</title>
+<title>CRAFT ROI Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -11,91 +11,95 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
-  --navy:#0B1F3A;--navy2:#162d50;--navy3:#1e3a60;
-  --orange:#F46A1E;--orange-lt:#FDE8D8;--orange-mid:#f9a97a;
-  --white:#fff;--off:#F4F2EE;--off2:#ECEAE5;
+  --navy:#0B1F3A;--navy2:#162d50;--orange:#F46A1E;--orange-lt:#FDE8D8;
+  --orange-mid:#f9a97a;--white:#fff;--off:#F4F2EE;--off2:#ECEAE5;
   --border:#DDD9D2;--text:#0B1F3A;--muted:#7A7670;
-  --green:#1A7A4A;--green-lt:#E6F4ED;
-  --amber:#B45A08;--amber-lt:#FEF3E2;
-  --red:#C0392B;--red-lt:#FDECEA;
+  --green:#1A7A4A;--green-lt:#E6F4ED;--amber:#B45A08;--amber-lt:#FEF3E2;
+  --red:#C0392B;--red-lt:#FDECEA;--blue:#1A5FA0;--blue-lt:#E8F0FB;
   --s1:#E84C3D;--s2:#E8943D;--s3:#3D9BE8;--s4:#1A7A4A;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--off);color:var(--text);min-height:100vh;}
 
 /* HEADER */
-header{background:var(--navy);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:300;}
+header{background:var(--navy);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:300;}
 .logo{display:flex;align-items:center;gap:10px;}
 .logo-mark{width:28px;height:28px;background:var(--orange);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;color:#fff;font-size:14px;}
-.logo-text{color:#fff;font-size:14px;font-weight:500;}.logo-text span{color:var(--orange);}
-.hdr-actions{display:flex;align-items:center;gap:8px;}
+.logo-txt{color:#fff;font-size:14px;font-weight:500;}.logo-txt span{color:var(--orange);}
+.hdr-r{display:flex;align-items:center;gap:8px;}
 .hdr-btn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);background:transparent;transition:all .15s;}
 .hdr-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
-.hdr-btn.orange{background:var(--orange);color:#fff;border-color:var(--orange);}
-.save-dot{width:7px;height:7px;border-radius:50%;background:#1A7A4A;display:inline-block;margin-right:4px;}
-.file-name{font-size:11px;color:rgba(255,255,255,.4);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hdr-btn.ora{background:var(--orange);color:#fff;border-color:var(--orange);}
+.hdr-btn.danger{border-color:rgba(192,57,43,.4);color:#e88;}
+.save-dot{width:7px;height:7px;border-radius:50%;background:#555;display:inline-block;}
+.fname{font-size:11px;color:rgba(255,255,255,.35);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* NAV */
-nav{background:var(--navy2);display:flex;align-items:center;padding:0 1.5rem;gap:2px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:56px;z-index:200;overflow-x:auto;}
-.nav-btn{padding:10px 14px;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:-1px;transition:all .15s;white-space:nowrap;}
-.nav-btn:hover{color:rgba(255,255,255,.8);}
-.nav-btn.active{color:var(--orange);border-bottom-color:var(--orange);}
+nav{background:var(--navy2);display:flex;align-items:center;padding:0 1.5rem;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:54px;z-index:200;overflow-x:auto;}
+.nb{padding:10px 14px;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:-1px;transition:all .15s;white-space:nowrap;}
+.nb:hover{color:rgba(255,255,255,.8);}
+.nb.active{color:var(--orange);border-bottom-color:var(--orange);}
 
 /* DL BAR */
-.dl-bar{background:var(--white);border-bottom:1px solid var(--border);padding:.5rem 1.5rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:40px;}
-.dl-lbl{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-right:4px;}
-.dl-btn{padding:5px 12px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--border);color:var(--navy);background:var(--off);display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
-.dl-btn:hover{background:var(--off2);}
-.dl-btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
-.dl-btn.exec{background:var(--orange);color:#fff;border-color:var(--orange);}
+.dlbar{background:var(--white);border-bottom:1px solid var(--border);padding:.4rem 1.5rem;display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-height:38px;}
+.dll{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-right:4px;}
+.dlb{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--border);color:var(--navy);background:var(--off);transition:all .15s;white-space:nowrap;}
+.dlb:hover{background:var(--off2);}
+.dlb.p{background:var(--navy);color:#fff;border-color:var(--navy);}
+.dlb.e{background:var(--orange);color:#fff;border-color:var(--orange);}
 
 /* MAIN */
 main{max-width:1320px;margin:0 auto;padding:1.5rem;}
 .view{display:none;}.view.active{display:block;}
 
-/* UPLOAD ZONE */
-.upload-zone{border:2px dashed var(--border);border-radius:16px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);margin-bottom:1.5rem;}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--orange);background:var(--orange-lt);}
-.upload-zone .uz-icon{font-size:40px;margin-bottom:1rem;}
-.upload-zone h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);margin-bottom:.5rem;}
-.upload-zone p{font-size:13px;color:var(--muted);margin-bottom:1rem;}
-.upload-zone .uz-btn{display:inline-block;padding:8px 24px;background:var(--orange);color:#fff;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;}
-.upload-zone input[type=file]{display:none;}
-.upload-status{background:var(--green-lt);border:1px solid var(--green);border-radius:8px;padding:.75rem 1rem;font-size:13px;color:var(--green);display:none;margin-bottom:1rem;}
-.upload-status.error{background:var(--red-lt);border-color:var(--red);color:var(--red);}
+/* UPLOAD */
+.upzone{border:2px dashed var(--border);border-radius:14px;padding:2.5rem 2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);margin-bottom:1.25rem;}
+.upzone:hover,.upzone.drag{border-color:var(--orange);background:var(--orange-lt);}
+.upzone h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);margin-bottom:.4rem;}
+.upzone p{font-size:13px;color:var(--muted);margin-bottom:.75rem;}
+.up-btn-lbl{display:inline-block;padding:8px 22px;background:var(--orange);color:#fff;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;}
+input[type=file]{display:none;}
+.upstatus{border-radius:8px;padding:.7rem 1rem;font-size:13px;display:none;margin-bottom:1rem;}
+.upstatus.ok{background:var(--green-lt);border:1px solid var(--green);color:var(--green);}
+.upstatus.err{background:var(--red-lt);border:1px solid var(--red);color:var(--red);}
+.upstatus.warn{background:var(--amber-lt);border:1px solid var(--amber);color:var(--amber);}
+
+/* VALIDATION SUMMARY */
+.val-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:1.25rem;}
+.val-item{padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);display:flex;align-items:center;gap:10px;}
+.val-icon{font-size:16px;flex-shrink:0;}
+.val-txt .vl{font-size:11px;color:var(--muted);font-weight:500;}
+.val-txt .vv{font-size:13px;font-weight:600;color:var(--navy);}
 
 /* MANUAL INPUTS */
-.manual-card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:1.25rem;margin-bottom:1.25rem;}
-.manual-card h3{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border);}
-.inp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
-.fgroup{display:flex;flex-direction:column;gap:5px;}
-.flabel{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;}
-.inp-w{position:relative;}
-.inp-p{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);pointer-events:none;}
+.mcard{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:1.25rem;margin-bottom:1.25rem;}
+.mcard h3{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:.875rem;padding-bottom:.625rem;border-bottom:1px solid var(--border);}
+.inp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fl{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;}
+.iw{position:relative;}
+.ip{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);pointer-events:none;}
 input[type=number],input[type=text],select{width:100%;padding:7px 9px 7px 22px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--white);-moz-appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
 input:focus,select:focus{outline:none;border-color:var(--orange);}
 input.np,select.np{padding-left:9px;}
 .hint{font-size:11px;color:var(--muted);margin-top:2px;}
-.generate-btn{width:100%;padding:12px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:1rem;}
-.generate-btn:hover{background:#d9561a;}
-.generate-btn:disabled{background:var(--muted);cursor:not-allowed;}
-
-/* PREVIEW TABLE */
-.preview-wrap{overflow-x:auto;margin-top:1rem;}
-.preview-table{width:100%;border-collapse:collapse;font-size:12px;}
-.preview-table th{padding:6px 10px;background:var(--navy);color:#fff;font-weight:500;border:1px solid var(--navy2);text-align:left;white-space:nowrap;}
-.preview-table td{padding:6px 10px;border:1px solid var(--border);color:var(--text);}
-.preview-table tr:nth-child(even) td{background:var(--off);}
+.gen-btn{width:100%;padding:11px;background:var(--orange);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:1rem;transition:background .15s;}
+.gen-btn:hover{background:#d9561a;}
+.gen-btn:disabled{background:var(--muted);cursor:not-allowed;}
 
 /* CARDS */
 .card{background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:1.25rem;}
-.card-hdr{padding:.875rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
-.card-hdr h3{font-size:13px;font-weight:600;color:var(--navy);}
-.card-hdr .tag{font-size:11px;background:var(--off);color:var(--muted);padding:2px 8px;border-radius:4px;}
-.chart-dl{padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:transparent;font-family:'DM Sans',sans-serif;}
-.chart-dl:hover{background:var(--off);}
-.card-body{padding:1.1rem;}
+.ch{padding:.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.ch h3{font-size:13px;font-weight:600;color:var(--navy);}
+.ch .tag{font-size:11px;background:var(--off);color:var(--muted);padding:2px 8px;border-radius:4px;}
+.cdl{padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:transparent;font-family:'DM Sans',sans-serif;}
+.cdl:hover{background:var(--off);}
+.cb{padding:1rem;}
+
+/* CHART DESCRIPTION */
+.cdesc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:.875rem;padding:.625rem .875rem;background:var(--off);border-radius:6px;border-left:3px solid var(--orange);}
+.cdesc strong{color:var(--navy);}
 
 /* GRIDS */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
@@ -106,42 +110,62 @@ input.np,select.np{padding-left:9px;}
 @media(max-width:600px){.g2,.g3,.g4,.g5{grid-template-columns:1fr;}}
 
 /* KPIs */
-.kpi{padding:14px;border-radius:8px;background:var(--off);}
+.kpi{padding:13px;border-radius:8px;background:var(--off);}
 .kpi.dark{background:var(--navy);}
-.kpi.green{background:var(--green-lt);}
+.kpi.grn{background:var(--green-lt);}
 .kpi.ora{background:var(--orange-lt);}
-.kpi .kl{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;color:var(--muted);}
+.kpi.blu{background:var(--blue-lt);}
+.kl{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;color:var(--muted);}
 .kpi.dark .kl{color:rgba(255,255,255,.4);}
-.kpi.green .kl{color:var(--green);}
+.kpi.grn .kl{color:var(--green);}
 .kpi.ora .kl{color:var(--amber);}
-.kpi .kv{font-size:22px;font-weight:600;color:var(--navy);line-height:1;}
+.kpi.blu .kl{color:var(--blue);}
+.kv{font-size:21px;font-weight:600;color:var(--navy);line-height:1;}
 .kpi.dark .kv{color:var(--orange);}
-.kpi.green .kv{color:var(--green);}
+.kpi.grn .kv{color:var(--green);}
 .kpi.ora .kv{color:var(--amber);}
-.kpi .ks{font-size:11px;color:var(--muted);margin-top:3px;}
+.kpi.blu .kv{color:var(--blue);}
+.ks{font-size:11px;color:var(--muted);margin-top:3px;}
 .kpi.dark .ks{color:rgba(255,255,255,.3);}
 
 /* CHARTS */
-.chart-wrap{position:relative;width:100%;}
+.cw{position:relative;width:100%;}
 .h200{height:200px;}.h260{height:260px;}.h300{height:300px;}.h340{height:340px;}.h380{height:380px;}
 
 /* TABLES */
-.data-table{width:100%;border-collapse:collapse;font-size:12px;}
-.data-table th{padding:7px 10px;background:var(--navy);color:#fff;font-weight:500;text-align:left;border:1px solid var(--navy2);white-space:nowrap;}
-.data-table td{padding:7px 10px;border:1px solid var(--border);color:var(--text);}
-.data-table tr:nth-child(even) td{background:var(--off);}
-.num{text-align:right;}
+.dt{width:100%;border-collapse:collapse;font-size:12px;}
+.dt th{padding:6px 10px;background:var(--navy);color:#fff;font-weight:500;text-align:left;border:1px solid var(--navy2);white-space:nowrap;}
+.dt td{padding:6px 10px;border:1px solid var(--border);color:var(--text);}
+.dt tr:nth-child(even) td{background:var(--off);}
+.dt .num{text-align:right;font-variant-numeric:tabular-nums;}
 .pos{color:var(--green);font-weight:500;}
 .neg{color:var(--red);font-weight:500;}
+.collapsible-table{display:none;margin-top:.75rem;}
+.toggle-table{font-size:11px;color:var(--orange);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;margin-top:.5rem;}
+.toggle-table:hover{text-decoration:underline;}
 
 /* INNER TABS */
-.itabs{display:flex;gap:6px;margin-bottom:1rem;}
-.itab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:var(--white);font-family:'DM Sans',sans-serif;transition:all .15s;}
+.itabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;}
+.itab{padding:5px 13px;border-radius:18px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:var(--white);font-family:'DM Sans',sans-serif;transition:all .15s;}
 .itab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+/* ALERTS */
+.alert-panel{margin-top:1rem;}
+.alert-hdr{display:flex;align-items:center;gap:8px;padding:.625rem .875rem;border-radius:8px 8px 0 0;font-size:13px;font-weight:600;}
+.alert-hdr.red{background:var(--red-lt);color:var(--red);border:1px solid var(--red);border-bottom:none;}
+.alert-hdr.amber{background:var(--amber-lt);color:var(--amber);border:1px solid var(--amber);border-bottom:none;}
+.alert-body{border:1px solid var(--border);border-radius:0 0 8px 8px;overflow:hidden;}
+.alert-row{padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:12px;}
+.alert-row:last-child{border-bottom:none;}
+.alert-row .ar-name{font-weight:600;color:var(--navy);margin-bottom:3px;}
+.alert-row .ar-detail{color:var(--muted);line-height:1.5;}
+.alert-row .ar-cause{margin-top:5px;padding:5px 10px;background:var(--amber-lt);border-radius:4px;color:var(--amber);font-size:11px;}
+.alert-row .ar-action{margin-top:5px;padding:5px 10px;background:var(--red-lt);border-radius:4px;color:var(--red);font-size:11px;}
+.no-alerts{padding:1rem;font-size:13px;color:var(--green);background:var(--green-lt);border-radius:8px;border:1px solid var(--green);}
 
 /* ATTR BOX */
 .attr-box{background:var(--navy);border-radius:10px;padding:1rem 1.25rem;}
-.ab-t{font-size:10px;font-weight:600;color:var(--orange);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem;}
+.abt{font-size:10px;font-weight:600;color:var(--orange);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem;}
 .arow{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07);}
 .arow:last-child{border-bottom:none;}
 .al{font-size:12px;color:rgba(255,255,255,.45);}
@@ -149,205 +173,309 @@ input.np,select.np{padding-left:9px;}
 .av.ora{color:var(--orange);}
 
 /* GEO FILTER */
-.geo-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
-.geo-filter label{font-size:12px;color:var(--muted);font-weight:500;}
-.geo-filter select{width:auto;padding:6px 9px;font-size:12px;padding-left:9px;}
+.gfilter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
+.gfilter label{font-size:12px;color:var(--muted);font-weight:500;}
+.gfilter select{width:auto;padding:5px 9px;font-size:12px;padding-left:9px;}
 
 /* SSEP */
-.ssep{font-size:10px;font-weight:600;color:var(--orange);letter-spacing:.07em;text-transform:uppercase;margin:1.25rem 0 .75rem;display:flex;align-items:center;gap:6px;}
+.ssep{font-size:10px;font-weight:600;color:var(--orange);letter-spacing:.07em;text-transform:uppercase;margin:1.1rem 0 .65rem;display:flex;align-items:center;gap:6px;}
 .ssep::after{content:'';flex:1;height:1px;background:var(--orange-lt);}
 
+/* ROI CHAIN */
+.roi-chain{display:flex;flex-direction:column;gap:6px;margin-top:.75rem;}
+.rc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:6px;font-size:13px;}
+.rc-row.input-row{background:var(--off);}
+.rc-row.calc-row{background:var(--green-lt);}
+.rc-row.total-row{background:var(--navy);color:#fff;font-weight:600;}
+.rc-row.total-row .rc-val{color:var(--orange);}
+.rc-lbl{color:var(--muted);font-size:12px;}
+.rc-row.total-row .rc-lbl{color:rgba(255,255,255,.6);}
+.rc-val{font-weight:600;color:var(--navy);}
+.rc-note{font-size:10px;color:var(--muted);margin-top:1px;}
+
 /* SLAB LEGEND */
-.slab-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:.75rem;}
-.slab-dot{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);}
-.slab-dot span{width:10px;height:10px;border-radius:2px;display:inline-block;}
+.slg{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:.75rem;}
+.sld{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);}
+.sld span{width:10px;height:10px;border-radius:2px;display:inline-block;}
 
 /* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
 
-/* NO DATA */
-.no-data{text-align:center;padding:3rem;color:var(--muted);font-size:13px;}
-.no-data .nd-icon{font-size:32px;margin-bottom:.75rem;}
-
 /* PG TITLE */
-.pg-title{margin-bottom:1.25rem;}
-.pg-title h2{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;color:var(--navy);}
-.pg-title p{font-size:13px;color:var(--muted);margin-top:2px;}
+.pgt{margin-bottom:1.1rem;}
+.pgt h2{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;color:var(--navy);}
+.pgt p{font-size:13px;color:var(--muted);margin-top:2px;}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">
     <div class="logo-mark">C</div>
-    <div class="logo-text"><span>CRAFT</span> ROI Tracker <span style="font-size:10px;color:rgba(255,255,255,.3);margin-left:4px">v5</span></div>
+    <div class="logo-txt"><span>CRAFT</span> ROI Tracker <span style="font-size:10px;color:rgba(255,255,255,.3);margin-left:3px">v6</span></div>
   </div>
-  <div class="hdr-actions">
-    <span class="save-dot" id="save-dot"></span>
-    <span class="file-name" id="file-name">No file uploaded</span>
+  <div class="hdr-r">
+    <span class="save-dot" id="sdot"></span>
+    <span class="fname" id="fname">No file uploaded</span>
     <button class="hdr-btn" onclick="shareURL()">🔗 Share</button>
-    <button class="hdr-btn orange" onclick="document.getElementById('file-input').click()">↑ Upload Excel</button>
-    <button class="hdr-btn" onclick="resetAll()" style="border-color:rgba(192,57,43,.4);color:#e88;">↺ Reset</button>
+    <button class="hdr-btn ora" onclick="document.getElementById('finput').click()">↑ Upload</button>
+    <button class="hdr-btn danger" onclick="resetAll()">↺ Reset</button>
   </div>
 </header>
 
 <nav>
-  <button class="nav-btn active" onclick="showView('upload',this)">📂 Upload & Setup</button>
-  <button class="nav-btn" onclick="showView('overview',this)">📊 Overview</button>
-  <button class="nav-btn" onclick="showView('performance',this)">📈 Performance</button>
-  <button class="nav-btn" onclick="showView('roi',this)">💰 ROI Summary</button>
-  <button class="nav-btn" onclick="showView('geography',this)">🗺 Geography</button>
-  <button class="nav-btn" onclick="showView('trend',this)">📉 Monthly Trend</button>
+  <button class="nb active" onclick="sv('upload',this)">📂 Upload</button>
+  <button class="nb" onclick="sv('overview',this)">📊 Overview</button>
+  <button class="nb" onclick="sv('performance',this)">📈 Performance</button>
+  <button class="nb" onclick="sv('roi',this)">💰 ROI</button>
+  <button class="nb" onclick="sv('geography',this)">🗺 Geography</button>
+  <button class="nb" onclick="sv('trend',this)">📉 Trend</button>
 </nav>
 
-<div class="dl-bar" id="dl-bar"></div>
+<div class="dlbar" id="dlbar"></div>
 
 <main>
 
-<!-- UPLOAD VIEW -->
+<!-- ══════ UPLOAD ══════ -->
 <div class="view active" id="view-upload">
-  <div class="pg-title">
-    <h2>Upload & Setup</h2>
-    <p>Upload the CRAFT v5 Excel workbook. All charts populate automatically. You only fill 3 fields.</p>
+  <div class="pgt"><h2>Upload & Setup</h2><p>Upload the CRAFT Standard Template. Fill 5 fields. Dashboard generates automatically.</p></div>
+
+  <div class="upzone" id="upzone" onclick="document.getElementById('finput').click()"
+       ondragover="dov(event)" ondragleave="dlv(event)" ondrop="dfd(event)">
+    <input type="file" id="finput" accept=".xlsx,.xls" onchange="hf(this.files[0])">
+    <div style="font-size:36px;margin-bottom:.75rem">📊</div>
+    <h3>Drop CRAFT Standard Template here</h3>
+    <p>Accepts the CRAFT ROI Standard Template with S1, S2, S3, S4 sheets</p>
+    <div class="up-btn-lbl">Choose File</div>
   </div>
 
-  <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
-    <input type="file" id="file-input" accept=".xlsx,.xls" onchange="handleFile(this.files[0])">
-    <div class="uz-icon">📊</div>
-    <h3>Drop your CRAFT Excel workbook here</h3>
-    <p>Accepts the CRAFT ROI Tracker v5 Excel file with S4 — Productivity and Output — ROI Summary sheets</p>
-    <div class="uz-btn">Choose File</div>
-  </div>
+  <div class="upstatus" id="upstatus"></div>
+  <div class="val-grid" id="val-grid" style="display:none"></div>
 
-  <div class="upload-status" id="upload-status"></div>
-
-  <!-- MANUAL INPUTS -->
-  <div class="manual-card">
-    <h3>Programme Parameters — Fill these 3 fields</h3>
+  <div class="mcard">
+    <h3>Programme Parameters — Fill these 5 fields</h3>
     <div class="inp-grid">
-      <div class="fgroup">
-        <label class="flabel">Programme / Course Name</label>
-        <input type="text" id="d-prog-name" class="np" value="" placeholder="e.g. AHFC Sales Training — Batch 1" oninput="autoSave()">
-      </div>
-      <div class="fgroup">
-        <label class="flabel">Training Month (M0)</label>
-        <select id="d-m0-month" class="np" onchange="autoSave();rebuildTrend()">
-          <option value="">— Select training month —</option>
-        </select>
-        <div class="hint">Select from months available in the uploaded file</div>
-      </div>
-      <div class="fgroup">
-        <label class="flabel">CRAFT Fee Paid (INR)</label>
-        <div class="inp-w"><span class="inp-p">₹</span><input type="number" id="d-fee" value="" placeholder="0" oninput="autoSave()"></div>
-      </div>
-      <div class="fgroup">
-        <label class="flabel">Replacement Cost / Employee (INR)</label>
-        <div class="inp-w"><span class="inp-p">₹</span><input type="number" id="d-repl" value="" placeholder="e.g. 90000" oninput="autoSave()"></div>
-        <div class="hint">Typically 3× monthly salary</div>
-      </div>
-      <div class="fgroup">
-        <label class="flabel">Regulatory Findings Saved <span style="color:var(--orange);font-size:10px">(optional)</span></label>
-        <div class="inp-w"><span class="inp-p">#</span><input type="number" id="d-reg" value="0" oninput="autoSave()"></div>
-      </div>
-      <div class="fgroup">
-        <label class="flabel">Cost per Finding (INR) <span style="color:var(--orange);font-size:10px">(optional)</span></label>
-        <div class="inp-w"><span class="inp-p">₹</span><input type="number" id="d-reg-cost" value="0" oninput="autoSave()"></div>
-      </div>
-      <div class="fgroup">
-        <label class="flabel">Complaints Reduced/Month <span style="color:var(--orange);font-size:10px">(optional)</span></label>
-        <div class="inp-w"><span class="inp-p">#</span><input type="number" id="d-comp-n" value="0" oninput="autoSave()"></div>
-      </div>
-      <div class="fgroup">
-        <label class="flabel">Cost per Complaint (INR) <span style="color:var(--orange);font-size:10px">(optional)</span></label>
-        <div class="inp-w"><span class="inp-p">₹</span><input type="number" id="d-comp-cost" value="0" oninput="autoSave()"></div>
-      </div>
+      <div class="fg"><label class="fl">Programme / Course Name</label>
+        <input type="text" id="d-prog" class="np" placeholder="e.g. AHFC Sales Training Batch 1" oninput="autoSave()"></div>
+      <div class="fg"><label class="fl">Training Month (M0)</label>
+        <select id="d-m0" class="np" onchange="autoSave()"><option value="">— select after upload —</option></select>
+        <div class="hint">Month training was conducted</div></div>
+      <div class="fg"><label class="fl">CRAFT Fee Paid (INR)</label>
+        <div class="iw"><span class="ip">₹</span><input type="number" id="d-fee" placeholder="0" oninput="autoSave()"></div></div>
+      <div class="fg"><label class="fl">Avg Monthly Salary — Cohort (INR)</label>
+        <div class="iw"><span class="ip">₹</span><input type="number" id="d-sal" placeholder="e.g. 32000" oninput="autoSave()"></div>
+        <div class="hint">From your payroll system</div></div>
+      <div class="fg"><label class="fl">Replacement Cost / Employee (INR)</label>
+        <div class="iw"><span class="ip">₹</span><input type="number" id="d-repl" placeholder="e.g. 90000" oninput="autoSave()"></div>
+        <div class="hint">Typically 3× monthly salary</div></div>
+      <div class="fg"><label class="fl">Net Yield % <span style="color:var(--orange);font-size:10px">(NBFC income on disbursement)</span></label>
+        <div class="iw"><span class="ip">%</span><input type="number" id="d-yield" value="4" step="0.1" oninput="autoSave()"></div>
+        <div class="hint">Typical AHFC: 3–5%</div></div>
+      <div class="fg"><label class="fl">Regulatory Findings Saved <span style="color:var(--muted);font-size:10px">(optional)</span></label>
+        <div class="iw"><span class="ip">#</span><input type="number" id="d-reg" value="0" oninput="autoSave()"></div></div>
+      <div class="fg"><label class="fl">Cost per Finding (INR) <span style="color:var(--muted);font-size:10px">(optional)</span></label>
+        <div class="iw"><span class="ip">₹</span><input type="number" id="d-regc" value="0" oninput="autoSave()"></div></div>
+      <div class="fg"><label class="fl">Complaints Reduced/Month <span style="color:var(--muted);font-size:10px">(optional)</span></label>
+        <div class="iw"><span class="ip">#</span><input type="number" id="d-comp" value="0" oninput="autoSave()"></div></div>
+      <div class="fg"><label class="fl">Cost per Complaint (INR) <span style="color:var(--muted);font-size:10px">(optional)</span></label>
+        <div class="iw"><span class="ip">₹</span><input type="number" id="d-compc" value="0" oninput="autoSave()"></div></div>
     </div>
-    <button class="generate-btn" id="generate-btn" onclick="generateDashboard()" disabled>↑ Upload Excel to Generate Dashboard</button>
+    <button class="gen-btn" id="genbtn" onclick="genDash()" disabled>↑ Upload file to generate dashboard</button>
   </div>
 
-  <!-- DATA PREVIEW -->
-  <div class="card" id="preview-card" style="display:none">
-    <div class="card-hdr"><h3>Data Preview — Output Sheet</h3><span class="tag" id="preview-tag">0 branches</span></div>
-    <div class="card-body" style="padding:0">
-      <div class="preview-wrap"><table class="preview-table" id="preview-table"></table></div>
+  <div class="card" id="previewcard" style="display:none">
+    <div class="ch"><h3>Data Preview — Branches loaded from S4</h3><span class="tag" id="prevtag">0 branches</span></div>
+    <div style="overflow-x:auto">
+      <table class="dt" id="prevtable"></table>
     </div>
   </div>
 </div>
 
-<!-- OVERVIEW VIEW -->
+<!-- ══════ OVERVIEW ══════ -->
 <div class="view" id="view-overview">
-  <div class="pg-title"><h2>Overview</h2><p id="ov-sub">Upload data to see overview</p></div>
-  <div id="ov-kpis" class="g5" style="margin-bottom:1.25rem"></div>
+  <div class="pgt"><h2>Overview</h2><p id="ov-sub">Upload data to begin</p></div>
+  <div class="g5" id="ov-kpis" style="margin-bottom:1.25rem"></div>
   <div class="g2">
-    <div class="card"><div class="card-hdr"><h3>Completion Slab Distribution</h3><span class="tag">All branches</span><button class="chart-dl" onclick="dlChart('ov-pie','Slab_Distribution')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h260"><canvas id="ov-pie"></canvas></div></div></div>
-    <div class="card"><div class="card-hdr"><h3>Headcount by Slab</h3><span class="tag">Employees</span><button class="chart-dl" onclick="dlChart('ov-bar-head','Headcount')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h260"><canvas id="ov-bar-head"></canvas></div></div></div>
+    <div class="card">
+      <div class="ch"><h3>Completion + Attrition by Slab</h3><span class="tag">Headcount & exit rate</span><button class="cdl" onclick="dlc('ov-compl','Completion_Attrition')">⬇ PNG</button></div>
+      <div class="cb">
+        <div class="cdesc"><strong>What it shows:</strong> Bars = headcount in each completion slab. Line = attrition rate per slab. <strong>Look for:</strong> Attrition rate falling as completion rises — this proves training increases retention. <strong>Source:</strong> S1 (status) + S2 (buckets)</div>
+        <div class="cw h260"><canvas id="ov-compl"></canvas></div>
+        <button class="toggle-table" onclick="tog('ov-compl-t')">▼ Show data table</button>
+        <div class="collapsible-table" id="ov-compl-t"><table class="dt" id="ov-compl-dt"></table></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>Completion Slab Distribution</h3><span class="tag">% of cohort</span><button class="cdl" onclick="dlc('ov-pie','Slab_Distribution')">⬇ PNG</button></div>
+      <div class="cb">
+        <div class="cdesc"><strong>What it shows:</strong> Share of cohort in each completion slab. <strong>Look for:</strong> Majority in ≥50% slabs indicates effective programme adoption. <strong>Source:</strong> S2 (completion %) + S1 (headcount)</div>
+        <div class="cw h260"><canvas id="ov-pie"></canvas></div>
+        <button class="toggle-table" onclick="tog('ov-pie-t')">▼ Show data table</button>
+        <div class="collapsible-table" id="ov-pie-t"><table class="dt" id="ov-pie-dt"></table></div>
+      </div>
+    </div>
   </div>
-  <div class="g2">
-    <div class="card"><div class="card-hdr"><h3>Target Achievement by Slab</h3><span class="tag">YTD %</span><button class="chart-dl" onclick="dlChart('ov-bar-tgt','Achievement')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h260"><canvas id="ov-bar-tgt"></canvas></div></div></div>
-    <div class="card"><div class="card-hdr"><h3>Exits by Completion Slab</h3><span class="tag">Attrition</span><button class="chart-dl" onclick="dlChart('ov-bar-exit','Exits')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h260"><canvas id="ov-bar-exit"></canvas></div></div></div>
+  <div class="card">
+    <div class="ch"><h3>Branch Summary</h3><span class="tag">All branches</span><button class="cdl" onclick="dlTabCSV('branches')">⬇ CSV</button></div>
+    <div style="overflow-x:auto"><table class="dt" id="ov-branch-dt"></table></div>
   </div>
-  <div class="card"><div class="card-hdr"><h3>Branch Summary</h3><span class="tag">All branches</span></div><div class="card-body" style="padding:0"><table class="data-table" id="ov-branch-table"></table></div></div>
+
+  <!-- ALERT: High performer attrition -->
+  <div id="ov-alerts"></div>
 </div>
 
-<!-- PERFORMANCE VIEW -->
+<!-- ══════ PERFORMANCE ══════ -->
 <div class="view" id="view-performance">
-  <div class="pg-title"><h2>Performance Analysis</h2><p>Disbursement productivity and target achievement by completion slab</p></div>
+  <div class="pgt"><h2>Performance Analysis</h2><p>Achievement % and disbursement productivity — treatment (≥50%) vs control (&lt;50%)</p></div>
   <div class="g2">
-    <div class="card"><div class="card-hdr"><h3>Achievement % by Slab</h3><span class="tag">YTD</span><button class="chart-dl" onclick="dlChart('pf-ach','Achievement_by_Slab')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="pf-ach"></canvas></div></div></div>
-    <div class="card"><div class="card-hdr"><h3>Achievement Gradient — Slab Comparison</h3><span class="tag">Higher completion = higher performance?</span><button class="chart-dl" onclick="dlChart('pf-gradient','Gradient')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="pf-gradient"></canvas></div></div></div>
+    <div class="card">
+      <div class="ch"><h3>Achievement % by Completion Slab</h3><span class="tag">YTD</span><button class="cdl" onclick="dlc('pf-ach','Achievement_by_Slab')">⬇ PNG</button></div>
+      <div class="cb">
+        <div class="cdesc"><strong>What it shows:</strong> YTD target achievement % for employees in each completion slab. <strong>Look for:</strong> A rising gradient from left (0–30%) to right (>75%) — this is the training attribution proof. <strong>Source:</strong> S3 (YTD Ach%) grouped by S2 bucket.</div>
+        <div class="cw h280"><canvas id="pf-ach"></canvas></div>
+        <button class="toggle-table" onclick="tog('pf-ach-t')">▼ Show data table</button>
+        <div class="collapsible-table" id="pf-ach-t"><table class="dt" id="pf-ach-dt"></table></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>Achievement Gradient — Treatment vs Control</h3><span class="tag">≥50% vs &lt;50%</span><button class="cdl" onclick="dlc('pf-grad','Gradient')">⬇ PNG</button></div>
+      <div class="cb">
+        <div class="cdesc"><strong>What it shows:</strong> Compares ≥50% completers (treatment group) against &lt;50% completers (control group). Same cohort, same market, same period. <strong>Look for:</strong> The gap between treatment and control — this gap is attributable to training. <strong>Source:</strong> S4 Section A (cols 10 & 11)</div>
+        <div class="cw h280"><canvas id="pf-grad"></canvas></div>
+        <button class="toggle-table" onclick="tog('pf-grad-t')">▼ Show data table</button>
+        <div class="collapsible-table" id="pf-grad-t"><table class="dt" id="pf-grad-dt"></table></div>
+      </div>
+    </div>
   </div>
-  <div class="card"><div class="card-hdr"><h3>Pre vs Post Training — Avg Disbursement / Employee (INR '000)</h3><span class="tag" id="pf-m0-tag">Select M0</span><button class="chart-dl" onclick="dlChart('pf-prepost','Pre_Post')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="pf-prepost"></canvas></div></div></div>
-  <div class="card"><div class="card-hdr"><h3>Performance Table</h3></div><div class="card-body" style="padding:0"><table class="data-table" id="pf-table"></table></div></div>
+  <div class="card">
+    <div class="ch"><h3>Pre vs Post Training — Avg Disbursement / Employee (INR '000)</h3><span class="tag" id="pf-m0tag">M0 not set</span><button class="cdl" onclick="dlc('pf-pp','Pre_Post_Disbursement')">⬇ PNG</button></div>
+    <div class="cb">
+      <div class="cdesc"><strong>What it shows:</strong> Average disbursement per employee per month — 3 months before M0 vs 3 months after M0. Three lines: overall, treatment (≥50%), control (&lt;50%). <strong>Look for:</strong> Treatment group improving more than control after M0. <strong>Source:</strong> S3 monthly data, filtered to employees with ≥3 months pre-M0 tenure. INR Thousands.</div>
+      <div class="cw h300"><canvas id="pf-pp"></canvas></div>
+      <button class="toggle-table" onclick="tog('pf-pp-t')">▼ Show data table</button>
+      <div class="collapsible-table" id="pf-pp-t"><table class="dt" id="pf-pp-dt"></table></div>
+    </div>
+  </div>
+
+  <!-- ALERT: At-risk employees -->
+  <div id="pf-alerts"></div>
 </div>
 
-<!-- ROI SUMMARY VIEW -->
+<!-- ══════ ROI ══════ -->
 <div class="view" id="view-roi">
-  <div class="pg-title"><h2>ROI Summary</h2><p>Investment vs return by completion slab</p></div>
+  <div class="pgt"><h2>ROI Summary</h2><p>Investment vs return — treatment group (≥50% completers) vs control period</p></div>
   <div class="g4" id="roi-kpis" style="margin-bottom:1.25rem"></div>
   <div class="g2">
-    <div class="card"><div class="card-hdr"><h3>ROI % by Slab</h3><button class="chart-dl" onclick="dlChart('roi-bar','ROI_by_Slab')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="roi-bar"></canvas></div></div></div>
-    <div class="card"><div class="card-hdr"><h3>Return Components</h3><button class="chart-dl" onclick="dlChart('roi-doughnut','Components')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="roi-doughnut"></canvas></div></div></div>
+    <div class="card">
+      <div class="ch"><h3>ROI % by Completion Slab</h3><button class="cdl" onclick="dlc('roi-bar','ROI_by_Slab')">⬇ PNG</button></div>
+      <div class="cb">
+        <div class="cdesc"><strong>What it shows:</strong> ROI % per slab = (net revenue gain − investment) ÷ investment. <strong>Look for:</strong> Rising ROI from 0–30% to >75%. <strong>Source:</strong> S3 disbursement delta × yield % + attrition savings ÷ CRAFT fee + time cost.</div>
+        <div class="cw h280"><canvas id="roi-bar"></canvas></div>
+        <button class="toggle-table" onclick="tog('roi-bar-t')">▼ Show data table</button>
+        <div class="collapsible-table" id="roi-bar-t"><table class="dt" id="roi-bar-dt"></table></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>Return Components</h3><button class="cdl" onclick="dlc('roi-dnut','Return_Components')">⬇ PNG</button></div>
+      <div class="cb">
+        <div class="cdesc"><strong>What it shows:</strong> Breakdown of total annual return by source. <strong>Look for:</strong> Which component drives the most return — disbursement revenue, attrition savings, or compliance savings. <strong>Source:</strong> Calculated from S3 + HR inputs.</div>
+        <div class="cw h280"><canvas id="roi-dnut"></canvas></div>
+      </div>
+    </div>
   </div>
+
+  <!-- ROI CHAIN -->
+  <div class="card">
+    <div class="ch"><h3>ROI Calculation Chain</h3><span class="tag">Every line explained</span><button class="cdl" onclick="dlTabCSV('roi')">⬇ CSV</button></div>
+    <div class="cb">
+      <div class="cdesc"><strong>What it shows:</strong> Step-by-step calculation from disbursement to net ROI. All figures are for the treatment group (≥50% completers) vs their pre-training baseline. Every number sourced and labelled.</div>
+      <div class="roi-chain" id="roi-chain"></div>
+    </div>
+  </div>
+
   <div class="g2">
-    <div class="card"><div class="card-hdr"><h3>Investment vs Return by Slab</h3><button class="chart-dl" onclick="dlChart('roi-grouped','Invest_Return')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="roi-grouped"></canvas></div></div></div>
-    <div>
-      <div class="card"><div class="card-hdr"><h3>ROI Breakdown Table</h3></div><div class="card-body" style="padding:0"><table class="data-table" id="roi-table"></table></div></div>
-      <div class="card" style="margin-top:0"><div class="card-hdr"><h3>Key Takeaways</h3></div><div class="card-body"><div class="attr-box"><div class="ab-t">Attribution</div><div class="arow"><span class="al">Best performing slab</span><span class="av ora" id="r-best">—</span></div><div class="arow"><span class="al">Highest ROI slab</span><span class="av ora" id="r-roi">—</span></div><div class="arow"><span class="al">Attrition cost saved</span><span class="av ora" id="r-attr">—</span></div><div class="arow"><span class="al">Optional savings (annual)</span><span class="av" id="r-opt">—</span></div><div class="arow"><span class="al">Fastest payback</span><span class="av ora" id="r-pay">—</span></div></div></div></div>
+    <div class="card">
+      <div class="ch"><h3>Investment vs Return by Slab</h3><button class="cdl" onclick="dlc('roi-grp','Invest_Return')">⬇ PNG</button></div>
+      <div class="cb"><div class="cw h280"><canvas id="roi-grp"></canvas></div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>Key Takeaways</h3></div>
+      <div class="cb">
+        <div class="attr-box">
+          <div class="abt">Attribution</div>
+          <div class="arow"><span class="al">Treatment group avg ach %</span><span class="av ora" id="r-tach">—</span></div>
+          <div class="arow"><span class="al">Control group avg ach %</span><span class="av" id="r-cach">—</span></div>
+          <div class="arow"><span class="al">Training attribution gap</span><span class="av ora" id="r-gap">—</span></div>
+          <div class="arow"><span class="al">Best ROI slab</span><span class="av ora" id="r-broi">—</span></div>
+          <div class="arow"><span class="al">Attrition cost saved</span><span class="av ora" id="r-attr">—</span></div>
+          <div class="arow"><span class="al">Payback period (treatment)</span><span class="av ora" id="r-pay">—</span></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- GEOGRAPHY VIEW -->
+<!-- ══════ GEOGRAPHY ══════ -->
 <div class="view" id="view-geography">
-  <div class="pg-title"><h2>Geography Analysis</h2><p>Branch and region drill-down — auto-populated from uploaded data</p></div>
-  <div class="geo-filter">
+  <div class="pgt"><h2>Geography Analysis</h2><p>Branch and region drill-down — auto-populated from uploaded data</p></div>
+  <div class="gfilter">
     <label>Filter:</label>
-    <select id="geo-reg-sel" class="np" onchange="refreshGeo()"><option value="">All Regions</option></select>
+    <select id="geo-reg" class="np" onchange="refGeo()"><option value="">All Regions</option></select>
   </div>
   <div class="g4" id="geo-kpis" style="margin-bottom:1.25rem"></div>
   <div class="g2">
-    <div class="card"><div class="card-hdr"><h3>Employees by Branch</h3><button class="chart-dl" onclick="dlChart('geo-emp','Employees_by_Branch')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="geo-emp"></canvas></div></div></div>
-    <div class="card"><div class="card-hdr"><h3>Achievement % by Branch</h3><button class="chart-dl" onclick="dlChart('geo-ach','Achievement_by_Branch')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="geo-ach"></canvas></div></div></div>
+    <div class="card">
+      <div class="ch"><h3>Achievement % by Branch</h3><button class="cdl" onclick="dlc('geo-ach','Achievement_Branch')">⬇ PNG</button></div>
+      <div class="cb">
+        <div class="cdesc"><strong>What it shows:</strong> YTD target achievement % per branch, colour-coded: green ≥50%, blue 30–50%, amber 15–30%, red &lt;15%. <strong>Source:</strong> S4 Section A col 9.</div>
+        <div class="cw h300"><canvas id="geo-ach"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><h3>Treatment vs Control Ach % by Branch</h3><button class="cdl" onclick="dlc('geo-tc','Treatment_Control_Branch')">⬇ PNG</button></div>
+      <div class="cb">
+        <div class="cdesc"><strong>What it shows:</strong> For each branch — ≥50% completers vs &lt;50% completers achievement side by side. <strong>Look for:</strong> Branches where the gap is large = training working well. Branches where gap is small = investigate. <strong>Source:</strong> S4 Section A cols 10 & 11.</div>
+        <div class="cw h300"><canvas id="geo-tc"></canvas></div>
+      </div>
+    </div>
   </div>
-  <div class="card"><div class="card-hdr"><h3>Branch Completion Profile</h3><button class="chart-dl" onclick="dlChart('geo-slab','Slab_by_Branch')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h340"><canvas id="geo-slab"></canvas></div></div></div>
-  <div class="card"><div class="card-hdr"><h3>Branch Detail Table</h3></div><div class="card-body" style="padding:0"><table class="data-table" id="geo-table"></table></div></div>
+  <div class="card">
+    <div class="ch"><h3>Completion Profile by Branch</h3><button class="cdl" onclick="dlc('geo-slab','Slab_Profile')">⬇ PNG</button></div>
+    <div class="cb">
+      <div class="cdesc"><strong>What it shows:</strong> Stacked bar — headcount per slab per branch. <strong>Look for:</strong> Branches dominated by 0–30% slab are under-adopting training. <strong>Source:</strong> S4 Section A cols 5–8.</div>
+      <div class="cw h320"><canvas id="geo-slab"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><h3>Branch Detail Table</h3><button class="cdl" onclick="dlTabCSV('branches')">⬇ CSV</button></div>
+    <div style="overflow-x:auto"><table class="dt" id="geo-dt"></table></div>
+  </div>
 </div>
 
-<!-- MONTHLY TREND VIEW -->
+<!-- ══════ TREND ══════ -->
 <div class="view" id="view-trend">
-  <div class="pg-title"><h2>Monthly Disbursement Trend</h2><p>Avg disbursement per employee (INR '000) — month on month from uploaded S4 data</p></div>
-  <div class="itabs" id="trend-tabs">
-    <button class="itab active" onclick="showTrend('overall',this)">Overall avg</button>
-    <button class="itab" onclick="showTrend('s0',this)">0–30%</button>
-    <button class="itab" onclick="showTrend('s1',this)">30–50%</button>
-    <button class="itab" onclick="showTrend('s2',this)">50–75%</button>
-    <button class="itab" onclick="showTrend('s3',this)">>75%</button>
+  <div class="pgt"><h2>Monthly Disbursement Trend</h2><p>Avg disbursement per employee (INR '000) — treatment vs control, month on month</p></div>
+  <div class="card">
+    <div class="ch"><h3>Treatment (≥50%) vs Control (&lt;50%) — Monthly Disbursement</h3><span class="tag" id="tr-m0tag">M0 not set</span><button class="cdl" onclick="dlc('tr-main','Treatment_vs_Control_Trend')">⬇ PNG</button></div>
+    <div class="cb">
+      <div class="cdesc"><strong>What it shows:</strong> The core attribution chart. Two lines — ≥50% completers and &lt;50% completers — in the same time period, same market. Vertical line marks M0. <strong>Look for:</strong> Lines diverging after M0 = training is causing the improvement, not market conditions. <strong>Source:</strong> S4 Section C cols 7 & 8.</div>
+      <div class="cw h360"><canvas id="tr-main"></canvas></div>
+      <button class="toggle-table" onclick="tog('tr-main-t')">▼ Show data table</button>
+      <div class="collapsible-table" id="tr-main-t"><table class="dt" id="tr-main-dt"></table></div>
+    </div>
   </div>
-  <div class="card"><div class="card-hdr"><h3 id="trend-title">Monthly Trend — Overall</h3><span class="tag" id="trend-m0-tag">M0 not set</span><button class="chart-dl" onclick="dlChart('trend-chart','Monthly_Trend')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h380"><canvas id="trend-chart"></canvas></div></div></div>
-  <div class="g2">
-    <div class="card"><div class="card-hdr"><h3>All Slabs Comparison</h3><button class="chart-dl" onclick="dlChart('trend-all','All_Slabs_Trend')">⬇ PNG</button></div><div class="card-body"><div class="chart-wrap h300"><canvas id="trend-all"></canvas></div></div></div>
-    <div class="card"><div class="card-hdr"><h3>Monthly Trend Table</h3></div><div class="card-body" style="padding:0"><div style="overflow-x:auto"><table class="data-table" id="trend-table"></table></div></div></div>
+  <div class="card">
+    <div class="ch"><h3>All Slabs — Monthly Disbursement</h3><button class="cdl" onclick="dlc('tr-all','All_Slabs_Trend')">⬇ PNG</button></div>
+    <div class="cb">
+      <div class="itabs" id="tr-tabs">
+        <button class="itab active" onclick="sti('all',this)">All slabs</button>
+        <button class="itab" onclick="sti('s0',this)">0–30%</button>
+        <button class="itab" onclick="sti('s1',this)">30–50%</button>
+        <button class="itab" onclick="sti('s2',this)">50–75%</button>
+        <button class="itab" onclick="sti('s3',this)">>75%</button>
+      </div>
+      <div class="cw h300"><canvas id="tr-all"></canvas></div>
+    </div>
   </div>
 </div>
 
@@ -357,141 +485,122 @@ input.np,select.np{padding-left:9px;}
 <script>
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
 const SLAB_LABELS=['0–30%','30–50%','50–75%','>75%'];
-const SLAB_KEYS=['0-30','30-50','50-75','>75'];
+const SLAB_KEYS=['0-30%','30-50%','50-75%','>75%'];
 const SLAB_COLORS=['#E84C3D','#E8943D','#3D9BE8','#1A7A4A'];
-const SLAB_LIGHT=['rgba(232,76,61,.12)','rgba(232,148,61,.12)','rgba(61,155,232,.12)','rgba(26,122,74,.12)'];
-const LS_KEY='craft_roi_v5';
+const SLAB_LIGHT=['rgba(232,76,61,.1)','rgba(232,148,61,.1)','rgba(61,155,232,.1)','rgba(26,122,74,.1)'];
+const MONTHS=['Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26'];
+const LS_KEY='craft_roi_v6';
 const charts={};
 
 // ── GLOBAL DATA ───────────────────────────────────────────────────────────────
 let DB={
-  branches:[],      // [{branch,region,emp,salary,s0,s1,s2,s3,achOverall,ach0,ach1,ach2,ach3}]
+  branches:[],   // [{branch,region,emp,s0,s1,s2,s3,achAll,achTreat,achCtrl,exits}]
   exits:{total:0,s0:0,s1:0,s2:0,s3:0},
-  months:[],        // ['Apr-25','May-25',...]
-  monthlyData:{},   // {branchName: {empId: {empId,bucket,monthly:[{month,tgt,disb}]}}}
-  slabMonthly:{},   // computed: {overall:[],s0:[],s1:[],s2:[],s3:[]} avg disb per month
-  m0Index:-1,
+  trend:{},      // {overall:[],s0:[],s1:[],s2:[],s3:[],treat:[],ctrl:[]}
+  months:[],     // actual months found in file
+  m0Idx:-1,
   fileName:'',
 };
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 function v(id){return parseFloat(document.getElementById(id)?.value)||0;}
 function vs(id){return document.getElementById(id)?.value||'';}
-function fmtINR(n){
-  if(!isFinite(n)||n===0)return '₹0';
-  const abs=Math.abs(n);
-  const sign=n<0?'-':'';
-  if(abs>=10000000)return sign+'₹'+(abs/10000000).toFixed(1)+' Cr';
-  if(abs>=100000)return sign+'₹'+(abs/100000).toFixed(1)+'L';
-  return sign+'₹'+Math.round(abs).toLocaleString('en-IN');
+function fINR(n){
+  if(!isFinite(n))return '—';
+  const a=Math.abs(n),s=n<0?'-':'';
+  if(a>=10000000)return s+'₹'+(a/10000000).toFixed(1)+' Cr';
+  if(a>=100000)return s+'₹'+(a/100000).toFixed(1)+'L';
+  return s+'₹'+Math.round(a).toLocaleString('en-IN');
 }
-function fmtL(n){return isFinite(n)?n.toFixed(2)+' L':'—';}
-function pct(n){return isFinite(n)&&n!==0?(n*100).toFixed(1)+'%':'—';}
-function pctV(n){return isFinite(n)&&n!==0?Math.round(n*100)+'%':'—';}
-function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-function mkChart(id,type,data,opts={}){
-  destroyChart(id);
-  const ctx=document.getElementById(id)?.getContext('2d');
-  if(!ctx)return;
+function pct(n,d=1){return isFinite(n)&&n!==''?(n*100).toFixed(d)+'%':'—';}
+function pctN(n){return isFinite(n)&&n!==''?Math.round(n*100)+'%':'—';}
+function toast(m,d=2500){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function today(){return new Date().toISOString().slice(0,10);}
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function mc(id,type,data,opts={}){
+  dc(id);const ctx=document.getElementById(id)?.getContext('2d');if(!ctx)return;
   charts[id]=new Chart(ctx,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},...opts}});
   return charts[id];
 }
-function toast(msg,dur=2500){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),dur);
+function tog(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.style.display=el.style.display==='block'?'none':'block';
 }
-function today(){return new Date().toISOString().slice(0,10);}
+function setSaveDot(ok){document.getElementById('sdot').style.background=ok?'#1A7A4A':'#E84C3D';}
 
 // ── DRAG & DROP ───────────────────────────────────────────────────────────────
-function dragOver(e){e.preventDefault();document.getElementById('upload-zone').classList.add('drag');}
-function dragLeave(e){document.getElementById('upload-zone').classList.remove('drag');}
-function dropFile(e){e.preventDefault();dragLeave(e);const f=e.dataTransfer.files[0];if(f)handleFile(f);}
+function dov(e){e.preventDefault();document.getElementById('upzone').classList.add('drag');}
+function dlv(e){document.getElementById('upzone').classList.remove('drag');}
+function dfd(e){e.preventDefault();dlv(e);const f=e.dataTransfer.files[0];if(f)hf(f);}
 
 // ── FILE HANDLING ─────────────────────────────────────────────────────────────
-function handleFile(file){
+function hf(file){
   if(!file)return;
-  if(!file.name.match(/\.xlsx?$/i)){showStatus('Please upload an Excel file (.xlsx or .xls)','error');return;}
-  document.getElementById('file-name').textContent=file.name;
+  if(!file.name.match(/\.xlsx?$/i)){showSt('Please upload an Excel file (.xlsx)','err');return;}
+  document.getElementById('fname').textContent=file.name;
   DB.fileName=file.name;
   const reader=new FileReader();
-  reader.onload=function(e){
+  reader.onload=e=>{
     try{
       const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
-      parseWorkbook(wb);
-      showStatus(`✓ File loaded — ${DB.branches.length} branches, ${DB.months.length} months (${DB.months[0]} to ${DB.months[DB.months.length-1]})`,'success');
-      buildMonthDropdown();
-      // Auto-select middle month as default M0 suggestion
-      const midIdx=Math.floor(DB.months.length/2);
-      document.getElementById('d-m0-month').value=String(midIdx);
-      DB.m0Index=midIdx;
+      parseWB(wb);
+      const errs=validateDB();
+      showValidation(errs);
+      buildM0Dropdown();
       showPreview();
-      document.getElementById('generate-btn').disabled=false;
-      document.getElementById('generate-btn').textContent='→ Generate Dashboard';
+      document.getElementById('genbtn').disabled=false;
+      document.getElementById('genbtn').textContent='→ Generate Dashboard';
       setSaveDot(true);
       autoSave();
-      toast('✓ '+DB.branches.length+' branches loaded. Set your 3 fields and click Generate.');
-    }catch(err){
-      showStatus('Error reading file: '+err.message,'error');
-      console.error(err);
-    }
+      toast(`✓ ${DB.branches.length} branches · ${DB.months.length} months loaded`);
+    }catch(err){showSt('Error reading file: '+err.message,'err');console.error(err);}
   };
   reader.readAsArrayBuffer(file);
 }
 
-function parseWorkbook(wb){
-  // ── EXACT COLUMN MAP for Output - ROI Summary ─────────────────────────────
-  // Row 3 (index 2) = headers
-  // Col 0=SN, 1=Branch, 2=Region, 3=No.of Employees, 4=Avg Monthly Salary
-  // Col 5=0%-30%, 6=30%-50%, 7=50%-75%, 8=>75%
-  // Col 9=Avg Target Ach%, 10=Ach0-30, 11=Ach30-50, 12=Ach50-75, 13=Ach>75
+// ── PARSER ────────────────────────────────────────────────────────────────────
+function parseWB(wb){
+  DB.branches=[];DB.exits={total:0,s0:0,s1:0,s2:0,s3:0};
+  DB.trend={overall:[],s0:[],s1:[],s2:[],s3:[],treat:[],ctrl:[]};
+  DB.months=[];
 
-  const outSheet=wb.Sheets['Output - ROI Summary'];
-  if(!outSheet)throw new Error('Sheet "Output - ROI Summary" not found.');
+  // ── S4 Summary Output ──────────────────────────────────────────────────────
+  const s4=wb.Sheets['S4 - Summary Output'];
+  if(!s4)throw new Error('"S4 - Summary Output" sheet not found. Please use the CRAFT Standard Template.');
 
-  const outData=XLSX.utils.sheet_to_json(outSheet,{header:1,defval:null});
-  DB.branches=[];
-  DB.exits={total:0,s0:0,s1:0,s2:0,s3:0};
+  const s4d=XLSX.utils.sheet_to_json(s4,{header:1,defval:null});
 
-  // Data rows start at index 3 (row 4), stop at TOTAL or blank SN
-  for(let i=3;i<outData.length;i++){
-    const row=outData[i];
-    if(!row)continue;
+  // Section A: Branch data starts at row index 5 (row 6 in Excel)
+  // Columns: 0=SN,1=Branch,2=Region,3=ActiveEmp,4=s0,5=s1,6=s2,7=s3,8=achAll,9=achTreat,10=achCtrl,11=exits
+  for(let i=5;i<s4d.length;i++){
+    const row=s4d[i];
+    if(!row||!row[1])continue;
+    const branch=String(row[1]).trim();
+    if(!branch||branch.toUpperCase().includes('TOTAL')||branch.toUpperCase().includes('EXIT'))break;
+    if(typeof row[0]==='string'&&row[0].includes('EXITS'))break;
     const sn=row[0];
-    const branch=String(row[1]||'').trim();
-    // Stop at TOTAL row or empty branch
-    if(!branch||String(branch).toUpperCase().includes('TOTAL'))break;
-    // Skip non-numeric SN rows (section headers)
-    if(sn===null||sn===undefined||isNaN(parseFloat(sn)))continue;
-
-    const rawSalary=parseFloat(row[4])||0;
-    // Excel serial dates are ~45000+ for 2023-2025 dates — salary should be much higher
-    // If value is suspiciously low (like a serial date number), it means sheet was saved without recalculation
-    const salary=rawSalary>1000&&rawSalary<500000?rawSalary:0;
+    if(isNaN(parseFloat(sn)))continue;
     DB.branches.push({
       branch,
       region:String(row[2]||'').trim(),
       emp:parseFloat(row[3])||0,
-      salary,
-      s0:parseFloat(row[5])||0,
-      s1:parseFloat(row[6])||0,
-      s2:parseFloat(row[7])||0,
-      s3:parseFloat(row[8])||0,
-      achOverall:parseFloat(row[9])||0,
-      ach0:parseFloat(row[10])||0,
-      ach1:parseFloat(row[11])||0,
-      ach2:parseFloat(row[12])||0,
-      ach3:parseFloat(row[13])||0,
+      s0:parseFloat(row[4])||0,
+      s1:parseFloat(row[5])||0,
+      s2:parseFloat(row[6])||0,
+      s3:parseFloat(row[7])||0,
+      achAll:parseFloat(row[8])||0,
+      achTreat:parseFloat(row[9])||0,
+      achCtrl:parseFloat(row[10])||0,
+      exits:parseFloat(row[11])||0,
     });
   }
 
-  if(!DB.branches.length)throw new Error('No branch data found in Output sheet. Check the file format.');
-
-  // ── Parse Exits section ───────────────────────────────────────────────────
-  // Look for row where col[0]='Count' — exits data is in cols 1-5
-  for(let i=0;i<outData.length;i++){
-    const row=outData[i];
+  // Section B: Exits — find row with 'Count'
+  for(let i=0;i<s4d.length;i++){
+    const row=s4d[i];
     if(!row)continue;
-    if(String(row[0]||'').toLowerCase().trim()==='count'){
+    if(String(row[0]||'').toLowerCase().trim()==='count'&&typeof row[1]==='number'){
       DB.exits.total=parseFloat(row[1])||0;
       DB.exits.s0=parseFloat(row[2])||0;
       DB.exits.s1=parseFloat(row[3])||0;
@@ -501,621 +610,791 @@ function parseWorkbook(wb){
     }
   }
 
-  // ── EXACT COLUMN MAP for S4 - Productivity ───────────────────────────────
-  // Row 2 (index 1): col0=title, cols 6,8,10,12,14,16,18,20,22,24,26,28=months, 30=YTD
-  // Row 3 (index 2): SN,EmpID,Name,Branch,Region,DOJ, then Target/Disb pairs
-  // Data rows: index 3 onwards
-  // Month cols: Apr-25=6, May-25=8, Jun-25=10, Jul-25=12, Aug-25=14,
-  //             Sep-25=16, Oct-25=18, Nov-25=20, Dec-25=22, Jan-26=24,
-  //             Feb-26=26, Mar-26=28
-  // Disb cols = month col + 1
-
-  const s4Sheet=wb.Sheets['S4 - Productivity'];
-  if(!s4Sheet){toast('⚠ S4 sheet not found — monthly trend unavailable');return;}
-
-  const s4Data=XLSX.utils.sheet_to_json(s4Sheet,{header:1,defval:null});
-  DB.months=[];
-  DB.monthlyData={};
-
-  // Build month map from row index 1 (second row)
-  const monthCols={}; // {monthLabel: {tgtCol, disbCol}}
-  const monthRow=s4Data[1]||[];
-  for(let c=0;c<monthRow.length;c++){
-    const cell=monthRow[c];
-    if(cell&&String(cell).match(/^[A-Za-z]{3}-\d{2}$/)){
-      const mLabel=String(cell).trim();
-      monthCols[mLabel]={tgtCol:c,disbCol:c+1};
-      if(!DB.months.includes(mLabel))DB.months.push(mLabel);
+  // Section C: Monthly trend — find header row with 'Month'
+  let trendHdrRow=-1;
+  for(let i=0;i<s4d.length;i++){
+    const row=s4d[i];
+    if(row&&String(row[0]||'').toLowerCase().trim()==='month'){trendHdrRow=i;break;}
+  }
+  if(trendHdrRow>=0){
+    // Cols: 0=Month,1=Overall,2=s0,3=s1,4=s2,5=s3,6=treat(≥50%),7=ctrl(<50%)
+    const keys=['overall','s0','s1','s2','s3','treat','ctrl'];
+    keys.forEach(k=>DB.trend[k]=[]);
+    for(let i=trendHdrRow+1;i<s4d.length;i++){
+      const row=s4d[i];
+      if(!row||!row[0])break;
+      const mLabel=String(row[0]).trim();
+      if(!mLabel||mLabel.toUpperCase().includes('SECTION'))break;
+      if(MONTHS.includes(mLabel)||mLabel.match(/[A-Za-z]{3}-\d{2}/)){
+        if(!DB.months.includes(mLabel))DB.months.push(mLabel);
+        DB.trend.overall.push(parseFloat(row[1])||null);
+        DB.trend.s0.push(parseFloat(row[2])||null);
+        DB.trend.s1.push(parseFloat(row[3])||null);
+        DB.trend.s2.push(parseFloat(row[4])||null);
+        DB.trend.s3.push(parseFloat(row[5])||null);
+        DB.trend.treat.push(parseFloat(row[6])||null);
+        DB.trend.ctrl.push(parseFloat(row[7])||null);
+      }
     }
   }
 
-  // ── Parse S2 for emp buckets ──────────────────────────────────────────────
-  // S2 header at row index 2: col1=EmpID, col13=EmpBucket, col14=FirstInactiveFlag
-  const s2Sheet=wb.Sheets['S2 - Course Completion'];
-  const empBuckets={}; // {empId: bucket}
-  if(s2Sheet){
-    const s2Data=XLSX.utils.sheet_to_json(s2Sheet,{header:1,defval:null});
-    // Data from row index 3 onwards
-    // Col 1=EmpID, Col 13=EmpBucket, Col 14=FirstInactiveFlag
-    for(let i=3;i<s2Data.length;i++){
-      const r=s2Data[i];
-      if(!r||!r[1])continue;
-      const eid=String(r[1]).trim();
-      const buc=String(r[13]||'').trim();
-      if(eid&&buc&&!empBuckets[eid])empBuckets[eid]=buc;
-    }
-  }
-
-  // ── Parse S4 data rows ────────────────────────────────────────────────────
-  // Col 0=SN, 1=EmpID, 2=Name, 3=Branch, 4=Region, 5=DOJ
-  // Then Target/Disb pairs from col 6 onwards per month
-  for(let i=3;i<s4Data.length;i++){
-    const row=s4Data[i];
-    if(!row||!row[1])continue;
-    const empId=String(row[1]).trim();
-    const branch=String(row[3]||'').trim();
-    if(!empId||!branch)continue;
-
-    const bucket=empBuckets[empId]||'unknown';
-    const monthly=DB.months.map(m=>{
-      const mc=monthCols[m];
-      if(!mc)return{month:m,tgt:0,disb:0};
-      const tgt=parseFloat(row[mc.tgtCol])||0;
-      const disb=parseFloat(row[mc.disbCol])||0;
-      return{month:m,tgt,disb};
-    });
-
-    if(!DB.monthlyData[branch])DB.monthlyData[branch]={};
-    DB.monthlyData[branch][empId]={empId,bucket,monthly};
-  }
-
-  computeSlabMonthly();
+  // If S4 months not found, use MONTHS order
+  if(!DB.months.length)DB.months=[...MONTHS];
 }
 
-function computeSlabMonthly(){
-  // Aggregate monthly data by slab across all branches
-  DB.slabMonthly={overall:[],s0:[],s1:[],s2:[],s3:[]};
-
-  DB.months.forEach((month,mi)=>{
-    const bucketGroups={overall:[],s0:[],s1:[],s2:[],s3:[]};
-    Object.values(DB.monthlyData).forEach(branchEmps=>{
-      Object.values(branchEmps).forEach(emp=>{
-        const md=emp.monthly[mi];
-        if(!md)return;
-        const disb=md.disb||0;
-        bucketGroups.overall.push(disb);
-        if(emp.bucket==='0-30')bucketGroups.s0.push(disb);
-        else if(emp.bucket==='30-50')bucketGroups.s1.push(disb);
-        else if(emp.bucket==='50-75')bucketGroups.s2.push(disb);
-        else if(emp.bucket==='>75')bucketGroups.s3.push(disb);
-      });
-    });
-    const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:null;
-    Object.keys(bucketGroups).forEach(k=>DB.slabMonthly[k].push(avg(bucketGroups[k])));
-  });
+function validateDB(){
+  const errs=[];
+  if(!DB.branches.length)errs.push({type:'err',msg:'No branch data found in S4. Check sheet name is exactly "S4 - Summary Output".'});
+  else errs.push({type:'ok',msg:`${DB.branches.length} branches loaded from S4`});
+  if(!DB.months.length)errs.push({type:'warn',msg:'Monthly trend data not found in S4 Section C — trend charts will be empty.'});
+  else errs.push({type:'ok',msg:`${DB.months.length} months of trend data (${DB.months[0]} – ${DB.months[DB.months.length-1]})`});
+  const totalSlabEmp=DB.branches.reduce((a,b)=>a+b.s0+b.s1+b.s2+b.s3,0);
+  const totalEmp=DB.branches.reduce((a,b)=>a+b.emp,0);
+  if(totalSlabEmp===0)errs.push({type:'warn',msg:'Completion bucket counts are all zero — S2 may not be linked correctly.'});
+  else errs.push({type:'ok',msg:`${totalEmp} active employees · Slab totals: ${totalSlabEmp}`});
+  if(DB.exits.total===0)errs.push({type:'warn',msg:'No exit data found — attrition analysis will be limited.'});
+  else errs.push({type:'ok',msg:`${DB.exits.total} exits found across slabs`});
+  return errs;
 }
 
-function buildMonthDropdown(){
-  const sel=document.getElementById('d-m0-month');
-  sel.innerHTML='<option value="">— Select training month —</option>';
+function showValidation(errs){
+  const grid=document.getElementById('val-grid');
+  grid.style.display='grid';
+  const icons={ok:'✅',warn:'⚠️',err:'❌'};
+  grid.innerHTML=errs.map(e=>`
+    <div class="val-item">
+      <div class="val-icon">${icons[e.type]}</div>
+      <div class="val-txt"><div class="vv">${e.msg}</div></div>
+    </div>`).join('');
+  const hasErr=errs.some(e=>e.type==='err');
+  showSt(hasErr?'File has errors — see validation above':'File loaded successfully',hasErr?'err':'ok');
+}
+
+function showSt(msg,type){
+  const el=document.getElementById('upstatus');
+  el.textContent=msg;el.className='upstatus '+type;el.style.display='block';
+}
+
+function buildM0Dropdown(){
+  const sel=document.getElementById('d-m0');
+  sel.innerHTML='<option value="">— select training month —</option>';
   DB.months.forEach((m,i)=>sel.innerHTML+=`<option value="${i}">${m}</option>`);
-}
-
-function showStatus(msg,type){
-  const el=document.getElementById('upload-status');
-  el.textContent=msg;el.className='upload-status'+(type==='error'?' error':'');
-  el.style.display='block';
+  // Default to middle month
+  if(DB.months.length){
+    const mid=Math.floor(DB.months.length/2);
+    sel.value=String(mid);
+    DB.m0Idx=mid;
+  }
 }
 
 function showPreview(){
-  const card=document.getElementById('preview-card');
+  const card=document.getElementById('previewcard');
   card.style.display='';
-  document.getElementById('preview-tag').textContent=DB.branches.length+' branches loaded';
-  const t=document.getElementById('preview-table');
-  t.innerHTML=`<thead><tr><th>Branch</th><th>Region</th><th class="num">Employees</th><th class="num">Avg Salary</th><th class="num">0–30%</th><th class="num">30–50%</th><th class="num">50–75%</th><th class="num">>75%</th><th class="num">Overall Ach%</th></tr></thead><tbody>`;
+  document.getElementById('prevtag').textContent=DB.branches.length+' branches';
+  const t=document.getElementById('prevtable');
+  t.innerHTML=`<thead><tr><th>Branch</th><th>Region</th><th class="num">Active</th><th class="num">0–30%</th><th class="num">30–50%</th><th class="num">50–75%</th><th class="num">>75%</th><th class="num">Overall Ach%</th><th class="num">≥50% Ach%</th><th class="num">&lt;50% Ach%</th><th class="num">Exits</th></tr></thead><tbody>`;
   DB.branches.forEach(b=>{
-    t.innerHTML+=`<tr><td>${b.branch}</td><td>${b.region}</td><td class="num">${b.emp}</td><td class="num">${fmtINR(b.salary)}</td><td class="num">${b.s0}</td><td class="num">${b.s1}</td><td class="num">${b.s2}</td><td class="num">${b.s3}</td><td class="num">${pct(b.achOverall)}</td></tr>`;
+    t.innerHTML+=`<tr><td>${b.branch}</td><td>${b.region}</td><td class="num">${b.emp}</td><td class="num">${b.s0}</td><td class="num">${b.s1}</td><td class="num">${b.s2}</td><td class="num">${b.s3}</td><td class="num">${pct(b.achAll)}</td><td class="num ${b.achTreat>b.achCtrl?'pos':''}">${pct(b.achTreat)}</td><td class="num">${pct(b.achCtrl)}</td><td class="num">${b.exits}</td></tr>`;
   });
-  t.innerHTML+=`</tbody>`;
+  t.innerHTML+='</tbody>';
 }
 
-// ── DASHBOARD GENERATION ─────────────────────────────────────────────────────
-function generateDashboard(){
-  DB.m0Index=parseInt(vs('d-m0-month'));
+// ── GENERATE ─────────────────────────────────────────────────────────────────
+function genDash(){
+  DB.m0Idx=parseInt(vs('d-m0'))||0;
   autoSave();
-  refreshAll();
-  showView('overview',document.querySelectorAll('.nav-btn')[1]);
-  toast('✓ Dashboard generated from '+DB.fileName);
+  refAll();
+  sv('overview',document.querySelectorAll('.nb')[1]);
+  toast('✓ Dashboard generated');
 }
 
-function getSlabTotals(){
-  const tots={s0:{emp:0,exit:0,achSum:0,achN:0},s1:{emp:0,exit:0,achSum:0,achN:0},s2:{emp:0,exit:0,achSum:0,achN:0},s3:{emp:0,exit:0,achSum:0,achN:0}};
+// ── COMPUTED TOTALS ───────────────────────────────────────────────────────────
+function getTotals(){
+  const t={emp:0,s0:0,s1:0,s2:0,s3:0,exits:DB.exits.total,
+    achAllSum:0,achAllN:0,achTreatSum:0,achTreatN:0,achCtrlSum:0,achCtrlN:0};
   DB.branches.forEach(b=>{
-    tots.s0.emp+=b.s0;tots.s1.emp+=b.s1;tots.s2.emp+=b.s2;tots.s3.emp+=b.s3;
-    if(b.ach0){tots.s0.achSum+=b.ach0*b.s0;tots.s0.achN+=b.s0;}
-    if(b.ach1){tots.s1.achSum+=b.ach1*b.s1;tots.s1.achN+=b.s1;}
-    if(b.ach2){tots.s2.achSum+=b.ach2*b.s2;tots.s2.achN+=b.s2;}
-    if(b.ach3){tots.s3.achSum+=b.ach3*b.s3;tots.s3.achN+=b.s3;}
+    t.emp+=b.emp;t.s0+=b.s0;t.s1+=b.s1;t.s2+=b.s2;t.s3+=b.s3;
+    if(b.achAll){t.achAllSum+=b.achAll*b.emp;t.achAllN+=b.emp;}
+    if(b.achTreat){t.achTreatSum+=b.achTreat*(b.s2+b.s3);t.achTreatN+=b.s2+b.s3;}
+    if(b.achCtrl){t.achCtrlSum+=b.achCtrl*(b.s0+b.s1);t.achCtrlN+=b.s0+b.s1;}
   });
-  tots.s0.exit=DB.exits.s0;tots.s1.exit=DB.exits.s1;tots.s2.exit=DB.exits.s2;tots.s3.exit=DB.exits.s3;
-  tots.s0.ach=tots.s0.achN?tots.s0.achSum/tots.s0.achN:0;
-  tots.s1.ach=tots.s1.achN?tots.s1.achSum/tots.s1.achN:0;
-  tots.s2.ach=tots.s2.achN?tots.s2.achSum/tots.s2.achN:0;
-  tots.s3.ach=tots.s3.achN?tots.s3.achSum/tots.s3.achN:0;
-  return tots;
+  t.achAll=t.achAllN?t.achAllSum/t.achAllN:0;
+  t.achTreat=t.achTreatN?t.achTreatSum/t.achTreatN:0;
+  t.achCtrl=t.achCtrlN?t.achCtrlSum/t.achCtrlN:0;
+  t.treatEmp=t.s2+t.s3;t.ctrlEmp=t.s0+t.s1;
+  return t;
 }
 
 function getPrePost(){
-  if(DB.m0Index<0||DB.m0Index>=DB.months.length)return null;
-  const m0=DB.m0Index;
-  const pre=DB.slabMonthly;
-  const getAvg=(arr,from,to)=>{const sl=arr.slice(from,to).filter(v=>v!==null);return sl.length?sl.reduce((a,b)=>a+b,0)/sl.length:0;};
-  const result={};
-  ['overall','s0','s1','s2','s3'].forEach(k=>{
-    result[k]={pre:getAvg(pre[k],0,m0),post:getAvg(pre[k],m0+1,pre[k].length)};
-  });
-  return result;
+  const m0=DB.m0Idx;
+  if(m0<0||!DB.months.length)return null;
+  const avg=(arr,from,to)=>{const sl=arr.slice(from,to).filter(v=>v!==null&&v>0);return sl.length?sl.reduce((a,b)=>a+b,0)/sl.length:0;};
+  const preFrom=Math.max(0,m0-3),preTo=m0;
+  const postFrom=m0+1,postTo=Math.min(DB.months.length,m0+4);
+  return{
+    overall:{pre:avg(DB.trend.overall,preFrom,preTo),post:avg(DB.trend.overall,postFrom,postTo)},
+    treat:{pre:avg(DB.trend.treat,preFrom,preTo),post:avg(DB.trend.treat,postFrom,postTo)},
+    ctrl:{pre:avg(DB.trend.ctrl,preFrom,preTo),post:avg(DB.trend.ctrl,postFrom,postTo)},
+    s0:{pre:avg(DB.trend.s0,preFrom,preTo),post:avg(DB.trend.s0,postFrom,postTo)},
+    s1:{pre:avg(DB.trend.s1,preFrom,preTo),post:avg(DB.trend.s1,postFrom,postTo)},
+    s2:{pre:avg(DB.trend.s2,preFrom,preTo),post:avg(DB.trend.s2,postFrom,postTo)},
+    s3:{pre:avg(DB.trend.s3,preFrom,preTo),post:avg(DB.trend.s3,postFrom,postTo)},
+  };
 }
 
 // ── OVERVIEW ─────────────────────────────────────────────────────────────────
-function refreshOverview(){
+function refOverview(){
   if(!DB.branches.length)return;
-  const tots=getSlabTotals();
-  const totalEmp=DB.branches.reduce((a,b)=>a+b.emp,0);
-  const totalExit=DB.exits.total;
-  const avgSal=DB.branches.reduce((a,b)=>a+b.salary*b.emp,0)/Math.max(totalEmp,1);
-  const avgAch=DB.branches.reduce((a,b)=>a+b.achOverall*b.emp,0)/Math.max(totalEmp,1);
-
-  document.getElementById('ov-sub').textContent=vs('d-prog-name')||DB.fileName||'Loaded from Excel';
+  const t=getTotals();
+  const fee=v('d-fee');
+  document.getElementById('ov-sub').textContent=vs('d-prog')||DB.fileName||'Loaded from CRAFT Template';
   document.getElementById('ov-kpis').innerHTML=[
-    {l:'Total Cohort',v:totalEmp,s:'all branches',cls:''},
-    {l:'Total Exits',v:totalExit,s:'attrition',cls:''},
-    {l:'Avg Monthly Salary',v:fmtINR(avgSal),s:'across cohort',cls:'ora'},
-    {l:'Avg Target Ach',v:pct(avgAch),s:'YTD overall',cls:'green'},
-    {l:'Branches',v:DB.branches.length,s:'in programme',cls:'dark'},
-  ].map(k=>`<div class="kpi ${k.cls}"><div class="kl">${k.l}</div><div class="kv">${k.v}</div><div class="ks">${k.s}</div></div>`).join('');
+    {l:'Total Cohort',v:t.emp,s:'active employees',c:''},
+    {l:'Treatment Group',v:t.treatEmp,s:'≥50% completers',c:'grn'},
+    {l:'Control Group',v:t.ctrlEmp,s:'<50% completers',c:'ora'},
+    {l:'Total Exits',v:t.exits,s:'across all slabs',c:''},
+    {l:'CRAFT Fee',v:fINR(fee),s:'programme cost',c:'dark'},
+  ].map(k=>`<div class="kpi ${k.c}"><div class="kl">${k.l}</div><div class="kv">${k.v}</div><div class="ks">${k.s}</div></div>`).join('');
 
-  const slabEmps=[tots.s0.emp,tots.s1.emp,tots.s2.emp,tots.s3.emp];
-  mkChart('ov-pie','doughnut',{labels:SLAB_LABELS,datasets:[{data:slabEmps,backgroundColor:SLAB_COLORS,borderWidth:2,borderColor:'#fff'}]},{plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
-  mkChart('ov-bar-head','bar',{labels:SLAB_LABELS,datasets:[{data:slabEmps,backgroundColor:SLAB_COLORS,borderRadius:4}]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}});
-  mkChart('ov-bar-tgt','bar',{labels:SLAB_LABELS,datasets:[{data:[tots.s0.ach,tots.s1.ach,tots.s2.ach,tots.s3.ach].map(v=>parseFloat((v*100).toFixed(1))),backgroundColor:SLAB_COLORS,borderRadius:4}]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}},x:{ticks:{font:{size:10}}}},plugins:{tooltip:{callbacks:{label:c=>c.raw+'%'}}}});
-  mkChart('ov-bar-exit','bar',{labels:SLAB_LABELS,datasets:[{data:[tots.s0.exit,tots.s1.exit,tots.s2.exit,tots.s3.exit],backgroundColor:SLAB_COLORS,borderRadius:4}]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}});
+  // Completion + Attrition dual axis
+  const slabEmps=[t.s0,t.s1,t.s2,t.s3];
+  const attrRates=[
+    DB.exits.s0/(t.s0||1)*100,DB.exits.s1/(t.s1||1)*100,
+    DB.exits.s2/(t.s2||1)*100,DB.exits.s3/(t.s3||1)*100,
+  ].map(v=>parseFloat(v.toFixed(1)));
+  mc('ov-compl','bar',{
+    labels:SLAB_LABELS,
+    datasets:[
+      {label:'Employees',data:slabEmps,backgroundColor:SLAB_COLORS,borderRadius:4,yAxisID:'y'},
+      {label:'Attrition %',data:attrRates,type:'line',borderColor:'#0B1F3A',backgroundColor:'transparent',pointBackgroundColor:SLAB_COLORS,pointRadius:5,tension:.3,yAxisID:'y2'},
+    ]
+  },{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y2:{position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:10},callback:v=>v+'%'}},x:{ticks:{font:{size:10}}}},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
+
+  // Pie
+  mc('ov-pie','doughnut',{
+    labels:SLAB_LABELS,
+    datasets:[{data:slabEmps,backgroundColor:SLAB_COLORS,borderWidth:2,borderColor:'#fff'}]
+  },{plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
+
+  // Data tables
+  const makeDT=(id,rows)=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=`<thead><tr><th>Slab</th><th class="num">Employees</th><th class="num">Attrition %</th></tr></thead><tbody>`+
+      rows.map(r=>`<tr><td><span style="color:${r.c};font-weight:600">${r.l}</span></td><td class="num">${r.e}</td><td class="num">${r.a}%</td></tr>`).join('')+'</tbody>';
+  };
+  makeDT('ov-compl-dt',[
+    {l:'0–30%',c:SLAB_COLORS[0],e:t.s0,a:attrRates[0]},
+    {l:'30–50%',c:SLAB_COLORS[1],e:t.s1,a:attrRates[1]},
+    {l:'50–75%',c:SLAB_COLORS[2],e:t.s2,a:attrRates[2]},
+    {l:'>75%',c:SLAB_COLORS[3],e:t.s3,a:attrRates[3]},
+  ]);
+  makeDT('ov-pie-dt',[
+    {l:'0–30%',c:SLAB_COLORS[0],e:t.s0,a:attrRates[0]},
+    {l:'30–50%',c:SLAB_COLORS[1],e:t.s1,a:attrRates[1]},
+    {l:'50–75%',c:SLAB_COLORS[2],e:t.s2,a:attrRates[2]},
+    {l:'>75%',c:SLAB_COLORS[3],e:t.s3,a:attrRates[3]},
+  ]);
 
   // Branch table
-  const t=document.getElementById('ov-branch-table');
-  t.innerHTML=`<thead><tr><th>Branch</th><th>Region</th><th class="num">Emp</th><th class="num">Avg Salary</th><th class="num">0–30%</th><th class="num">30–50%</th><th class="num">50–75%</th><th class="num">>75%</th><th class="num">Ach %</th></tr></thead><tbody>`;
-  DB.branches.forEach(b=>t.innerHTML+=`<tr><td>${b.branch}</td><td>${b.region}</td><td class="num">${b.emp}</td><td class="num">${fmtINR(b.salary)}</td><td class="num">${b.s0}</td><td class="num">${b.s1}</td><td class="num">${b.s2}</td><td class="num">${b.s3}</td><td class="num ${b.achOverall>=0.5?'pos':b.achOverall>0?'neg':''}">${pct(b.achOverall)}</td></tr>`);
-  t.innerHTML+=`</tbody>`;
+  const bt=document.getElementById('ov-branch-dt');
+  bt.innerHTML=`<thead><tr><th>Branch</th><th>Region</th><th class="num">Active</th><th class="num">0–30%</th><th class="num">30–50%</th><th class="num">50–75%</th><th class="num">>75%</th><th class="num">Overall Ach%</th><th class="num">≥50% Ach%</th><th class="num">&lt;50% Ach%</th><th class="num">Exits</th></tr></thead><tbody>`;
+  DB.branches.forEach(b=>{
+    bt.innerHTML+=`<tr><td>${b.branch}</td><td>${b.region}</td><td class="num">${b.emp}</td><td class="num">${b.s0}</td><td class="num">${b.s1}</td><td class="num">${b.s2}</td><td class="num">${b.s3}</td><td class="num">${pct(b.achAll)}</td><td class="num ${b.achTreat>b.achCtrl?'pos':''}">${pct(b.achTreat)}</td><td class="num">${pct(b.achCtrl)}</td><td class="num">${b.exits}</td></tr>`;
+  });
+  bt.innerHTML+='</tbody>';
+
+  // Alert: High performer attrition
+  buildHPAttrAlert();
+}
+
+function buildHPAttrAlert(){
+  const alerts=[];
+  DB.branches.forEach(b=>{
+    const treatEmp=b.s2+b.s3;
+    const treatExitEst=DB.exits.s2+DB.exits.s3; // total, not branch-specific
+    // Flag: branch with >20% exits AND treats > 0
+    if(treatEmp>0&&b.exits>0){
+      const exitRate=b.exits/b.emp;
+      if(exitRate>0.2&&b.achTreat>b.achCtrl){
+        let cause='';
+        if(b.exits>=2)cause='Multiple high-performer exits from this branch — recommend branch manager review. Possible causes: poaching by competitors, compensation mismatch post-training, or target revision.';
+        else cause='High-performer attrition detected. Possible cause: elevated market value post-training not matched by salary revision.';
+        alerts.push({branch:b.branch,exits:b.exits,emp:b.emp,exitRate,treatAch:b.achTreat,cause,
+          action:`Replace cost: ~${fINR(b.exits*v('d-repl'))}. Recommend: Zonal Head review for ${b.branch}.`});
+      }
+    }
+  });
+  const el=document.getElementById('ov-alerts');
+  if(!alerts.length){
+    el.innerHTML=`<div class="no-alerts">✅ No high-performer attrition anomalies detected in this dataset.</div>`;
+    return;
+  }
+  el.innerHTML=`<div class="alert-panel">
+    <div class="alert-hdr red">⚠ High-Performer Attrition Alert — ${alerts.length} branch${alerts.length>1?'es':''} flagged</div>
+    <div class="alert-body">${alerts.map(a=>`
+      <div class="alert-row">
+        <div class="ar-name">${a.branch} — ${a.exits} exit${a.exits>1?'s':''} (${Math.round(a.exitRate*100)}% of branch)</div>
+        <div class="ar-detail">≥50% completers achievement: <strong>${pct(a.treatAch)}</strong> — these are trained, performing employees.</div>
+        <div class="ar-cause">📌 Probable cause: ${a.cause}</div>
+        <div class="ar-action">🔴 Recommended action: ${a.action}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
 }
 
 // ── PERFORMANCE ───────────────────────────────────────────────────────────────
-function refreshPerformance(){
+function refPerformance(){
   if(!DB.branches.length)return;
-  const tots=getSlabTotals();
+  const t=getTotals();
   const pp=getPrePost();
-  const m0Label=DB.m0Index>=0?DB.months[DB.m0Index]:'Not set';
-  document.getElementById('pf-m0-tag').textContent='Training month: '+m0Label;
+  const m0Label=DB.m0Idx>=0&&DB.months[DB.m0Idx]?DB.months[DB.m0Idx]:'Not set';
+  document.getElementById('pf-m0tag').textContent='M0: '+m0Label;
 
-  const achVals=[tots.s0.ach,tots.s1.ach,tots.s2.ach,tots.s3.ach].map(v=>parseFloat((v*100).toFixed(1)));
-  mkChart('pf-ach','bar',{labels:SLAB_LABELS,datasets:[{label:'Ach %',data:achVals,backgroundColor:SLAB_COLORS,borderRadius:4}]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}},x:{ticks:{font:{size:10}}}},plugins:{tooltip:{callbacks:{label:c=>c.raw+'%'}}}});
+  // Achievement by slab bars
+  const achBySlabAll=[t.s0,t.s1,t.s2,t.s3].map((_,i)=>{
+    const empKey=['s0','s1','s2','s3'][i];
+    const achKey=['achAll','achAll','achAll','achAll'][i]; // use branch-level
+    // Compute weighted avg ach for this slab across branches
+    let sum=0,n=0;
+    DB.branches.forEach(b=>{
+      const e=b[['s0','s1','s2','s3'][i]];
+      // Approximate: use achTreat for s2+s3, achCtrl for s0+s1
+      const ach=i>=2?b.achTreat:b.achCtrl;
+      if(ach&&e){sum+=ach*e;n+=e;}
+    });
+    return n?parseFloat((sum/n*100).toFixed(1)):0;
+  });
 
-  // Gradient chart — line showing ach progression across slabs
-  mkChart('pf-gradient','line',{labels:SLAB_LABELS,datasets:[{label:'Achievement %',data:achVals,borderColor:'#0B1F3A',backgroundColor:'rgba(11,31,58,.06)',tension:.4,fill:true,pointBackgroundColor:SLAB_COLORS,pointRadius:6,pointHoverRadius:8}]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}},x:{ticks:{font:{size:10}}}},plugins:{legend:{display:false}}});
+  mc('pf-ach','bar',{labels:SLAB_LABELS,datasets:[{label:'Achievement %',data:achBySlabAll,backgroundColor:SLAB_COLORS,borderRadius:4}]},
+    {scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}},x:{ticks:{font:{size:10}}}},plugins:{tooltip:{callbacks:{label:c=>c.raw+'%'}}}});
 
-  // Pre vs Post
-  if(pp){
-    const preVals=['s0','s1','s2','s3'].map(k=>parseFloat((pp[k].pre||0).toFixed(2)));
-    const postVals=['s0','s1','s2','s3'].map(k=>parseFloat((pp[k].post||0).toFixed(2)));
-    mkChart('pf-prepost','bar',{labels:SLAB_LABELS,datasets:[
-      {label:'Pre-training avg disb (INR L)',data:preVals,backgroundColor:'rgba(11,31,58,.35)',borderRadius:3},
-      {label:'Post-training avg disb (INR L)',data:postVals,backgroundColor:SLAB_COLORS,borderRadius:3}
-    ]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
+  // Treatment vs Control gradient
+  const treatAch=parseFloat((t.achTreat*100).toFixed(1));
+  const ctrlAch=parseFloat((t.achCtrl*100).toFixed(1));
+  const overallAch=parseFloat((t.achAll*100).toFixed(1));
+  mc('pf-grad','bar',{
+    labels:['<50% Completers\n(Control)','Overall\nCohort','≥50% Completers\n(Treatment)'],
+    datasets:[{label:'Achievement %',data:[ctrlAch,overallAch,treatAch],
+      backgroundColor:['#E84C3D','#3D9BE8','#1A7A4A'],borderRadius:6}]
+  },{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'},max:Math.min(100,Math.max(treatAch,100)*1.1)},x:{ticks:{font:{size:10}}}},
+    plugins:{tooltip:{callbacks:{label:c=>c.raw+'%'}}}});
+
+  // Pre vs Post — 3-line chart
+  if(pp&&DB.months.length){
+    const m0=DB.m0Idx;
+    const labels=DB.months.map((m,i)=>{const o=i-m0;return o<0?`M${o}`:o===0?'M0':`M+${o}`;});
+    mc('pf-pp','line',{
+      labels,
+      datasets:[
+        {label:'Overall',data:DB.trend.overall,borderColor:'#162d50',backgroundColor:'rgba(22,45,80,.05)',tension:.4,pointRadius:3,fill:true,spanGaps:true},
+        {label:'≥50% (Treatment)',data:DB.trend.treat,borderColor:'#1A7A4A',backgroundColor:'rgba(26,122,74,.08)',tension:.4,pointRadius:4,pointBackgroundColor:'#1A7A4A',fill:true,spanGaps:true,borderWidth:2.5},
+        {label:'<50% (Control)',data:DB.trend.ctrl,borderColor:'#E84C3D',backgroundColor:'rgba(232,76,61,.06)',tension:.4,pointRadius:4,pointBackgroundColor:'#E84C3D',fill:true,spanGaps:true,borderDash:[4,3]},
+      ]
+    },{
+      scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}}},
+      plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}},
+        annotation:{annotations:{m0line:{type:'line',xMin:m0,xMax:m0,borderColor:'rgba(244,106,30,.6)',borderWidth:2,borderDash:[5,4],label:{content:'M0',display:true,position:'start',color:'#F46A1E',font:{size:10}}}}}}
+    });
+
+    // Data table
+    const ppt=document.getElementById('pf-pp-dt');
+    ppt.innerHTML=`<thead><tr><th>Month</th><th class="num">Overall (₹'000)</th><th class="num">≥50% Treatment</th><th class="num">&lt;50% Control</th><th class="num">Gap</th></tr></thead><tbody>`;
+    DB.months.forEach((m,i)=>{
+      const o=i-m0;const lbl=o<0?`M${o}`:o===0?'M0 ★':`M+${o}`;
+      const ov=DB.trend.overall[i];const tr=DB.trend.treat[i];const ct=DB.trend.ctrl[i];
+      const gap=tr&&ct?parseFloat((tr-ct).toFixed(2)):null;
+      const style=o===0?'background:var(--orange-lt);font-weight:600':'';
+      ppt.innerHTML+=`<tr style="${style}"><td>${lbl} (${m})</td><td class="num">${ov?.toFixed(2)||'—'}</td><td class="num">${tr?.toFixed(2)||'—'}</td><td class="num">${ct?.toFixed(2)||'—'}</td><td class="num ${gap>0?'pos':''}">${gap!==null?(gap>0?'+':'')+gap:'—'}</td></tr>`;
+    });
+    ppt.innerHTML+='</tbody>';
   }
 
-  // Performance table
-  const t=document.getElementById('pf-table');
-  t.innerHTML=`<thead><tr><th>Slab</th><th class="num">Emp</th><th class="num">Achievement %</th><th class="num">Pre Disb (₹'000)</th><th class="num">Post Disb (₹'000)</th><th class="num">Delta</th><th class="num">Exits</th></tr></thead><tbody>`;
-  const slabs=[{k:'s0',t:tots.s0},{k:'s1',t:tots.s1},{k:'s2',t:tots.s2},{k:'s3',t:tots.s3}];
-  slabs.forEach((s,i)=>{
-    const pre=pp?parseFloat((pp[['s0','s1','s2','s3'][i]].pre||0).toFixed(2)):0;
-    const post=pp?parseFloat((pp[['s0','s1','s2','s3'][i]].post||0).toFixed(2)):0;
-    const delta=(post-pre).toFixed(2);
-    t.innerHTML+=`<tr><td><span style="color:${SLAB_COLORS[i]};font-weight:600">${SLAB_LABELS[i]}</span></td><td class="num">${s.t.emp}</td><td class="num ${s.t.ach>=0.5?'pos':''}">${pct(s.t.ach)}</td><td class="num">${pre}</td><td class="num">${post}</td><td class="num ${delta>0?'pos':delta<0?'neg':''}">${delta>0?'+':''}${delta}</td><td class="num">${s.t.exit}</td></tr>`;
+  // Achievement tables
+  const padt=document.getElementById('pf-ach-dt');
+  padt.innerHTML=`<thead><tr><th>Slab</th><th class="num">Employees</th><th class="num">Achievement %</th></tr></thead><tbody>`;
+  SLAB_LABELS.forEach((l,i)=>{
+    padt.innerHTML+=`<tr><td><span style="color:${SLAB_COLORS[i]};font-weight:600">${l}</span></td><td class="num">${[t.s0,t.s1,t.s2,t.s3][i]}</td><td class="num">${achBySlabAll[i]}%</td></tr>`;
   });
-  t.innerHTML+=`</tbody>`;
+  padt.innerHTML+='</tbody>';
+
+  const gdt=document.getElementById('pf-grad-dt');
+  gdt.innerHTML=`<thead><tr><th>Group</th><th class="num">Employees</th><th class="num">Achievement %</th></tr></thead><tbody>
+    <tr><td>Control (&lt;50%)</td><td class="num">${t.ctrlEmp}</td><td class="num neg">${ctrlAch}%</td></tr>
+    <tr><td>Overall</td><td class="num">${t.emp}</td><td class="num">${overallAch}%</td></tr>
+    <tr><td>Treatment (≥50%)</td><td class="num">${t.treatEmp}</td><td class="num pos">${treatAch}%</td></tr>
+    <tr style="font-weight:600"><td>Training Attribution Gap</td><td class="num">—</td><td class="num pos">+${(treatAch-ctrlAch).toFixed(1)}pp</td></tr>
+    </tbody>`;
+
+  // At-risk alert
+  buildAtRiskAlert();
+}
+
+function buildAtRiskAlert(){
+  const alerts=[];
+  DB.branches.forEach(b=>{
+    const ctrlEmp=b.s0+b.s1;
+    if(ctrlEmp>0&&b.achCtrl<b.achTreat*0.7){
+      alerts.push({
+        branch:b.branch,
+        ctrlEmp,
+        ctrlAch:b.achCtrl,
+        treatAch:b.achTreat,
+        gap:b.achTreat-b.achCtrl,
+        msg:`${ctrlEmp} employees in &lt;50% completion slab achieving ${pct(b.achCtrl)} vs ${pct(b.achTreat)} for completers in same branch.`,
+        action:`Immediate completion push needed. At current trajectory, these ${ctrlEmp} employees are leaving ${fINR(ctrlEmp*(b.achTreat-b.achCtrl)*v('d-sal')*v('d-yield')/100*12)} annual revenue on the table.`
+      });
+    }
+  });
+  const el=document.getElementById('pf-alerts');
+  if(!alerts.length){
+    el.innerHTML=`<div class="no-alerts" style="margin-top:1rem">✅ No at-risk low-completion employees flagged in this dataset.</div>`;
+    return;
+  }
+  el.innerHTML=`<div class="alert-panel" style="margin-top:1rem">
+    <div class="alert-hdr amber">⚠ At-Risk: Low Completion, Low Performance — ${alerts.length} branch${alerts.length>1?'es':''}</div>
+    <div class="alert-body">${alerts.map(a=>`
+      <div class="alert-row">
+        <div class="ar-name">${a.branch} — ${a.ctrlEmp} employees in &lt;50% slab</div>
+        <div class="ar-detail">${a.msg} Training attribution gap: <strong>+${pct(a.gap)}</strong></div>
+        <div class="ar-cause">📌 Why not completing? Possible: manager not enforcing, access issues, role mismatch, or employee resistance. Enrolled but not progressing for 60+ days.</div>
+        <div class="ar-action">🔴 ${a.action}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
 }
 
 // ── ROI ───────────────────────────────────────────────────────────────────────
-function refreshROI(){
+function refROI(){
   if(!DB.branches.length)return;
-  const tots=getSlabTotals();
+  const t=getTotals();
   const pp=getPrePost();
-  const fee=v('d-fee'),repl=v('d-repl');
-  const reg=v('d-reg')*v('d-reg-cost');
-  const comp=v('d-comp-n')*v('d-comp-cost')*12;
+  const fee=v('d-fee'),sal=v('d-sal'),repl=v('d-repl'),yld=v('d-yield')/100;
+  const reg=v('d-reg')*v('d-regc');
+  const comp=v('d-comp')*v('d-compc')*12;
   const optSavings=reg+comp;
-  const totalEmp=DB.branches.reduce((a,b)=>a+b.emp,0);
-  const avgSal=DB.branches.reduce((a,b)=>a+b.salary*b.emp,0)/Math.max(totalEmp,1);
-  const hrs=10; // default training hours since not in file
+  const hrs=10; // standard training hours
+  const timeCost=t.emp*sal*(hrs/160);
+  const totalInvest=fee+timeCost;
 
-  const slabData=[{k:'s0',t:tots.s0},{k:'s1',t:tots.s1},{k:'s2',t:tots.s2},{k:'s3',t:tots.s3}].map((s,i)=>{
-    const emp=s.t.emp;
-    const timeCost=emp*avgSal*(hrs/160);
-    const slabFee=totalEmp>0?(emp/totalEmp)*fee:0;
-    const ti=slabFee+timeCost;
-    const pre=pp?pp[['s0','s1','s2','s3'][i]].pre:0;
-    const post=pp?pp[['s0','s1','s2','s3'][i]].post:0;
-    // Values in S4 are INR Thousands — multiply by 1000 for INR
-    const pg=emp*(post-pre)*1000*12;
-    const as=s.t.exit*repl;
-    const tr=pg+as+(totalEmp>0?(emp/totalEmp)*optSavings:0);
-    const roi=ti>0?Math.round((tr-ti)/ti*100):0;
-    const pay=tr/12>0?(ti/(tr/12)).toFixed(1):'—';
-    return{label:SLAB_LABELS[i],color:SLAB_COLORS[i],emp,ti,pg,as,tr,roi,pay,ach:s.t.ach};
-  });
+  // Incremental disbursement: treatment post - treatment pre (3-month windows)
+  const treatPre=pp?pp.treat.pre:0;
+  const treatPost=pp?pp.treat.post:0;
+  const ctrlPre=pp?pp.ctrl.pre:0;
+  const ctrlPost=pp?pp.ctrl.post:0;
+  // Attribution-adjusted delta: treatment improvement minus control improvement
+  const rawDelta=(treatPost-treatPre);
+  const ctrlDrift=(ctrlPost-ctrlPre);
+  const attrDelta=Math.max(0,rawDelta-ctrlDrift); // subtract market drift
 
-  const totalInvest=slabData.reduce((a,s)=>a+s.ti,0);
-  const totalReturn=slabData.reduce((a,s)=>a+s.tr,0)+optSavings;
+  const incrDisbAnnual=attrDelta*t.treatEmp*1000*12; // INR '000 → INR × 12 months
+  const netRevenue=incrDisbAnnual*yld;
+  const attrSaved=DB.exits.total*repl;
+  const totalReturn=netRevenue+attrSaved+optSavings;
   const overallROI=totalInvest>0?Math.round((totalReturn-totalInvest)/totalInvest*100):0;
   const payback=totalReturn/12>0?(totalInvest/(totalReturn/12)).toFixed(1):'—';
-  const totalAttrSaved=slabData.reduce((a,s)=>a+s.as,0);
 
   document.getElementById('roi-kpis').innerHTML=[
-    {l:'Total Investment',v:fmtINR(totalInvest),s:'fee + time cost',cls:''},
-    {l:'Total Return (Annual)',v:fmtINR(totalReturn),s:'productivity + savings',cls:'green'},
-    {l:'Overall ROI',v:overallROI+'%',s:'on investment',cls:'dark'},
-    {l:'Payback Period',v:payback+' mo',s:'months',cls:'ora'},
-  ].map(k=>`<div class="kpi ${k.cls}"><div class="kl">${k.l}</div><div class="kv">${k.v}</div><div class="ks">${k.s}</div></div>`).join('');
+    {l:'Total Investment',v:fINR(totalInvest),s:'CRAFT fee + time cost',c:''},
+    {l:'Incr. Disbursement',v:fINR(incrDisbAnnual),s:'annual (attribution-adj.)',c:'blu'},
+    {l:'Net Revenue @ '+v('d-yield')+'% yield',v:fINR(netRevenue),s:'NBFC income on incr. disb.',c:'grn'},
+    {l:'Overall ROI',v:overallROI+'%',s:'on training investment',c:'dark'},
+  ].map(k=>`<div class="kpi ${k.c}"><div class="kl">${k.l}</div><div class="kv">${k.v}</div><div class="ks">${k.s}</div></div>`).join('');
 
-  mkChart('roi-bar','bar',{labels:SLAB_LABELS,datasets:[{data:slabData.map(s=>s.roi),backgroundColor:SLAB_COLORS,borderRadius:4}]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}},x:{ticks:{font:{size:10}}}},plugins:{tooltip:{callbacks:{label:c=>c.raw+'%'}}}});
-  const prodTotal=slabData.reduce((a,s)=>a+s.pg,0);
-  mkChart('roi-doughnut','doughnut',{labels:['Productivity','Attrition Saved','Reg & Compliance','Complaints'],datasets:[{data:[Math.max(0,prodTotal),Math.max(0,totalAttrSaved),Math.max(0,reg),Math.max(0,comp)],backgroundColor:['#0B1F3A','#1A7A4A','#F46A1E','#3D9BE8'],borderWidth:2,borderColor:'#fff'}]},{plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
-  mkChart('roi-grouped','bar',{labels:SLAB_LABELS,datasets:[{label:'Investment',data:slabData.map(s=>Math.round(s.ti)),backgroundColor:'rgba(11,31,58,.4)',borderRadius:3},{label:'Return',data:slabData.map(s=>Math.round(s.tr)),backgroundColor:SLAB_COLORS,borderRadius:3}]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>fmtINR(v)}},x:{ticks:{font:{size:10}}}},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtINR(c.raw)}}}});
+  // Per-slab ROI
+  const slabRoi=SLAB_LABELS.map((l,i)=>{
+    const emp=[t.s0,t.s1,t.s2,t.s3][i];
+    const sf=t.emp>0?(emp/t.emp)*fee:0;
+    const tc=emp*sal*(hrs/160);
+    const ti=sf+tc;
+    const slabDelta=pp?Math.max(0,([pp.s0,pp.s1,pp.s2,pp.s3][i].post-[pp.s0,pp.s1,pp.s2,pp.s3][i].pre)-ctrlDrift):0;
+    const pg=slabDelta*emp*1000*12*yld;
+    const as=[DB.exits.s0,DB.exits.s1,DB.exits.s2,DB.exits.s3][i]*repl;
+    const tr=pg+as;
+    const roi=ti>0?Math.round((tr-ti)/ti*100):0;
+    const pay=tr/12>0?(ti/(tr/12)).toFixed(1):'—';
+    return{l,c:SLAB_COLORS[i],emp,ti,pg,as,tr,roi,pay};
+  });
 
-  const t=document.getElementById('roi-table');
-  t.innerHTML=`<thead><tr><th>Slab</th><th class="num">Emp</th><th class="num">Investment</th><th class="num">Prod Gain</th><th class="num">Attr Saved</th><th class="num">Return</th><th class="num">ROI %</th><th class="num">Payback</th></tr></thead><tbody>`;
-  slabData.forEach(s=>t.innerHTML+=`<tr><td><span style="color:${s.color};font-weight:600">${s.label}</span></td><td class="num">${s.emp}</td><td class="num">${fmtINR(s.ti)}</td><td class="num pos">${fmtINR(s.pg)}</td><td class="num pos">${fmtINR(s.as)}</td><td class="num pos">${fmtINR(s.tr)}</td><td class="num pos">${s.roi}%</td><td class="num">${s.pay} mo</td></tr>`);
-  t.innerHTML+=`</tbody>`;
+  mc('roi-bar','bar',{labels:SLAB_LABELS,datasets:[{data:slabRoi.map(s=>s.roi),backgroundColor:SLAB_COLORS,borderRadius:4}]},
+    {scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}},x:{ticks:{font:{size:10}}}},plugins:{tooltip:{callbacks:{label:c=>c.raw+'%'}}}});
 
-  const best=slabData.reduce((a,b)=>b.ach>a.ach?b:a);
-  const bestROI=slabData.reduce((a,b)=>b.roi>a.roi?b:a);
-  const fp=slabData.filter(s=>s.pay!=='—').reduce((a,b)=>parseFloat(b.pay)<parseFloat(a.pay)?b:a,slabData[slabData.length-1]);
-  document.getElementById('r-best').textContent=best.label+' ('+pct(best.ach)+' ach)';
-  document.getElementById('r-roi').textContent=bestROI.label+' ('+bestROI.roi+'% ROI)';
-  document.getElementById('r-attr').textContent=fmtINR(totalAttrSaved);
-  document.getElementById('r-opt').textContent=fmtINR(optSavings);
-  document.getElementById('r-pay').textContent=fp.label+' ('+fp.pay+' months)';
+  mc('roi-dnut','doughnut',{
+    labels:['Net Disbursement Revenue','Attrition Saved','Compliance Savings','Complaint Savings'],
+    datasets:[{data:[Math.max(0,netRevenue),Math.max(0,attrSaved),Math.max(0,reg),Math.max(0,comp)],backgroundColor:['#0B1F3A','#1A7A4A','#F46A1E','#3D9BE8'],borderWidth:2,borderColor:'#fff'}]
+  },{plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
+
+  mc('roi-grp','bar',{labels:SLAB_LABELS,datasets:[
+    {label:'Investment',data:slabRoi.map(s=>Math.round(s.ti)),backgroundColor:'rgba(11,31,58,.4)',borderRadius:3},
+    {label:'Return',data:slabRoi.map(s=>Math.round(s.tr)),backgroundColor:SLAB_COLORS,borderRadius:3}
+  ]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>fINR(v)}},x:{ticks:{font:{size:10}}}},
+    plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fINR(c.raw)}}}});
+
+  // ROI chain
+  const chain=document.getElementById('roi-chain');
+  chain.innerHTML=[
+    {l:'Treatment group employees (≥50% completers)',v:t.treatEmp+' employees',note:'Source: S4 slab counts',cls:'input-row'},
+    {l:'Pre-training avg disbursement (3-month window before M0)',v:(treatPre||0).toFixed(2)+" INR '000/emp/month",note:'Source: S4 Section C trend, M-3 to M-1',cls:'input-row'},
+    {l:'Post-training avg disbursement (3-month window after M0)',v:(treatPost||0).toFixed(2)+" INR '000/emp/month",note:'Source: S4 Section C trend, M+1 to M+3',cls:'input-row'},
+    {l:'Control group drift (market improvement, same period)',v:ctrlDrift.toFixed(2)+" INR '000/emp/month",note:'Control group (0–30%) change in same months — removes seasonal effect',cls:'input-row'},
+    {l:'Attribution-adjusted delta (training-specific improvement)',v:attrDelta.toFixed(2)+" INR '000/emp/month",note:'= treatment delta − control drift. This is the training effect only.',cls:'calc-row'},
+    {l:'Annual incremental disbursement (treatment group)',v:fINR(incrDisbAnnual),note:`= ${attrDelta.toFixed(2)} × ${t.treatEmp} emp × 1,000 × 12 months`,cls:'calc-row'},
+    {l:'Net revenue at '+v('d-yield')+'% yield',v:fINR(netRevenue),note:'= Incremental disbursement × yield %. NBFC income earned on extra loans.',cls:'calc-row'},
+    {l:'Attrition savings',v:fINR(attrSaved),note:`= ${DB.exits.total} exits × ₹${v('d-repl').toLocaleString()} replacement cost`,cls:'calc-row'},
+    {l:'Compliance & complaint savings',v:fINR(optSavings),note:'Optional — from HR inputs',cls:'calc-row'},
+    {l:'TOTAL ANNUAL RETURN',v:fINR(totalReturn),note:'Net revenue + attrition savings + compliance savings',cls:'total-row'},
+    {l:'Total investment (CRAFT fee + internal time cost)',v:fINR(totalInvest),note:`= ₹${fee.toLocaleString()} fee + ${t.emp} emp × ₹${sal.toLocaleString()} salary × ${hrs}/160 hrs`,cls:'input-row'},
+    {l:'NET ROI',v:overallROI+'%',note:'= (Total return − Total investment) ÷ Total investment × 100',cls:'total-row'},
+    {l:'Payback period',v:payback+' months',note:'= Total investment ÷ (Annual return ÷ 12)',cls:'total-row'},
+  ].map(r=>`<div class="rc-row ${r.cls}"><div><div class="rc-lbl">${r.l}</div><div class="rc-note">${r.note}</div></div><div class="rc-val">${r.v}</div></div>`).join('');
+
+  // Table for CSV
+  const rt=document.getElementById('roi-bar-dt');
+  rt.innerHTML=`<thead><tr><th>Slab</th><th class="num">Emp</th><th class="num">Investment</th><th class="num">Prod Gain</th><th class="num">Attr Saved</th><th class="num">Total Return</th><th class="num">ROI %</th><th class="num">Payback</th></tr></thead><tbody>`;
+  slabRoi.forEach(s=>rt.innerHTML+=`<tr><td><span style="color:${s.c};font-weight:600">${s.l}</span></td><td class="num">${s.emp}</td><td class="num">${fINR(s.ti)}</td><td class="num pos">${fINR(s.pg)}</td><td class="num pos">${fINR(s.as)}</td><td class="num pos">${fINR(s.tr)}</td><td class="num pos">${s.roi}%</td><td class="num">${s.pay} mo</td></tr>`);
+  rt.innerHTML+='</tbody>';
+
+  // Key takeaways
+  const t2=getTotals();
+  document.getElementById('r-tach').textContent=pct(t2.achTreat);
+  document.getElementById('r-cach').textContent=pct(t2.achCtrl);
+  document.getElementById('r-gap').textContent='+'+pct(t2.achTreat-t2.achCtrl)+' pp';
+  const bestROI=slabRoi.reduce((a,b)=>b.roi>a.roi?b:a);
+  document.getElementById('r-broi').textContent=bestROI.l+' ('+bestROI.roi+'%)';
+  document.getElementById('r-attr').textContent=fINR(attrSaved);
+  document.getElementById('r-pay').textContent=payback+' months';
 }
 
 // ── GEOGRAPHY ─────────────────────────────────────────────────────────────────
-function refreshGeo(){
+function refGeo(){
   if(!DB.branches.length)return;
-  const rSel=document.getElementById('geo-reg-sel');
+  const rsel=document.getElementById('geo-reg');
   const regions=[...new Set(DB.branches.map(b=>b.region).filter(Boolean))];
-  const selR=rSel.value;
-  rSel.innerHTML='<option value="">All Regions</option>'+regions.map(r=>`<option value="${r}"${r===selR?'selected':''}>${r}</option>`).join('');
-  const filtered=selR?DB.branches.filter(b=>b.region===selR):DB.branches;
-  const totalEmp=filtered.reduce((a,b)=>a+b.emp,0);
-  const avgAch=totalEmp>0?filtered.reduce((a,b)=>a+b.achOverall*b.emp,0)/totalEmp:0;
+  const selR=rsel.value;
+  rsel.innerHTML='<option value="">All Regions</option>'+regions.map(r=>`<option value="${r}"${r===selR?'selected':''}>${r}</option>`).join('');
+  const filt=selR?DB.branches.filter(b=>b.region===selR):DB.branches;
+  const totalEmp=filt.reduce((a,b)=>a+b.emp,0);
+  const avgAch=totalEmp?filt.reduce((a,b)=>a+b.achAll*b.emp,0)/totalEmp:0;
 
   document.getElementById('geo-kpis').innerHTML=[
-    {l:'Regions',v:regions.length,s:'total',cls:''},
-    {l:'Branches',v:filtered.length,s:'filtered',cls:''},
-    {l:'Employees',v:totalEmp,s:'filtered headcount',cls:'green'},
-    {l:'Avg Achievement',v:pct(avgAch),s:'filtered',cls:'dark'},
-  ].map(k=>`<div class="kpi ${k.cls}"><div class="kl">${k.l}</div><div class="kv">${k.v}</div><div class="ks">${k.s}</div></div>`).join('');
+    {l:'Regions',v:regions.length,s:'total',c:''},
+    {l:'Branches',v:filt.length,s:'filtered',c:''},
+    {l:'Employees',v:totalEmp,s:'filtered',c:'grn'},
+    {l:'Avg Achievement',v:pct(avgAch),s:'overall',c:'dark'},
+  ].map(k=>`<div class="kpi ${k.c}"><div class="kl">${k.l}</div><div class="kv">${k.v}</div><div class="ks">${k.s}</div></div>`).join('');
 
-  const labels=filtered.map(b=>b.branch);
-  mkChart('geo-emp','bar',{labels,datasets:[{data:filtered.map(b=>b.emp),backgroundColor:filtered.map((_,i)=>SLAB_COLORS[i%4]),borderRadius:4}]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{ticks:{font:{size:9},maxRotation:45}}},plugins:{legend:{display:false}}});
-  mkChart('geo-ach','bar',{labels,datasets:[{data:filtered.map(b=>parseFloat((b.achOverall*100).toFixed(1))),backgroundColor:filtered.map(b=>b.achOverall>=0.5?'#1A7A4A':b.achOverall>=0.3?'#3D9BE8':b.achOverall>=0.1?'#E8943D':'#E84C3D'),borderRadius:4}]},{scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}},x:{ticks:{font:{size:9},maxRotation:45}}},plugins:{tooltip:{callbacks:{label:c=>c.raw+'%'}},legend:{display:false}}});
+  const labels=filt.map(b=>b.branch);
+  mc('geo-ach','bar',{labels,datasets:[{label:'Achievement %',data:filt.map(b=>parseFloat((b.achAll*100).toFixed(1))),backgroundColor:filt.map(b=>b.achAll>=0.5?'#1A7A4A':b.achAll>=0.3?'#3D9BE8':b.achAll>=0.15?'#E8943D':'#E84C3D'),borderRadius:4}]},
+    {indexAxis:'y',scales:{x:{max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}},y:{ticks:{font:{size:9}}}},plugins:{tooltip:{callbacks:{label:c=>c.raw+'%'}},legend:{display:false}}});
 
-  // Stacked slab chart
-  mkChart('geo-slab','bar',{labels,datasets:[
-    {label:'0–30%',data:filtered.map(b=>b.s0),backgroundColor:'#E84C3D',stack:'a'},
-    {label:'30–50%',data:filtered.map(b=>b.s1),backgroundColor:'#E8943D',stack:'a'},
-    {label:'50–75%',data:filtered.map(b=>b.s2),backgroundColor:'#3D9BE8',stack:'a'},
-    {label:'>75%',data:filtered.map(b=>b.s3),backgroundColor:'#1A7A4A',stack:'a'},
-  ]},{scales:{y:{stacked:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{stacked:true,ticks:{font:{size:9},maxRotation:45}}},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
+  mc('geo-tc','bar',{labels,datasets:[
+    {label:'≥50% Treatment',data:filt.map(b=>parseFloat((b.achTreat*100).toFixed(1))),backgroundColor:'#1A7A4A',borderRadius:3},
+    {label:'<50% Control',data:filt.map(b=>parseFloat((b.achCtrl*100).toFixed(1))),backgroundColor:'#E84C3D',borderRadius:3}
+  ]},{scales:{y:{max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}},x:{ticks:{font:{size:9},maxRotation:45}}},
+    plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+'%'}}}});
 
-  const t=document.getElementById('geo-table');
-  t.innerHTML=`<thead><tr><th>Branch</th><th>Region</th><th class="num">Emp</th><th class="num">0–30%</th><th class="num">30–50%</th><th class="num">50–75%</th><th class="num">>75%</th><th class="num">Ach %</th><th class="num">Avg Salary</th></tr></thead><tbody>`;
-  filtered.forEach(b=>t.innerHTML+=`<tr><td>${b.branch}</td><td>${b.region}</td><td class="num">${b.emp}</td><td class="num">${b.s0}</td><td class="num">${b.s1}</td><td class="num">${b.s2}</td><td class="num">${b.s3}</td><td class="num ${b.achOverall>=0.5?'pos':''}">${pct(b.achOverall)}</td><td class="num">${fmtINR(b.salary)}</td></tr>`);
-  t.innerHTML+=`</tbody>`;
+  mc('geo-slab','bar',{labels,datasets:[
+    {label:'0–30%',data:filt.map(b=>b.s0),backgroundColor:'#E84C3D',stack:'s'},
+    {label:'30–50%',data:filt.map(b=>b.s1),backgroundColor:'#E8943D',stack:'s'},
+    {label:'50–75%',data:filt.map(b=>b.s2),backgroundColor:'#3D9BE8',stack:'s'},
+    {label:'>75%',data:filt.map(b=>b.s3),backgroundColor:'#1A7A4A',stack:'s'},
+  ]},{scales:{y:{stacked:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{stacked:true,ticks:{font:{size:9},maxRotation:45}}},
+    plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
+
+  const gt=document.getElementById('geo-dt');
+  gt.innerHTML=`<thead><tr><th>Branch</th><th>Region</th><th class="num">Active</th><th class="num">0–30%</th><th class="num">30–50%</th><th class="num">50–75%</th><th class="num">>75%</th><th class="num">Overall Ach%</th><th class="num">≥50% Ach%</th><th class="num">&lt;50% Ach%</th><th class="num">Exits</th></tr></thead><tbody>`;
+  filt.forEach(b=>gt.innerHTML+=`<tr><td>${b.branch}</td><td>${b.region}</td><td class="num">${b.emp}</td><td class="num">${b.s0}</td><td class="num">${b.s1}</td><td class="num">${b.s2}</td><td class="num">${b.s3}</td><td class="num">${pct(b.achAll)}</td><td class="num ${b.achTreat>b.achCtrl?'pos':''}">${pct(b.achTreat)}</td><td class="num">${pct(b.achCtrl)}</td><td class="num">${b.exits}</td></tr>`);
+  gt.innerHTML+='</tbody>';
 }
 
-// ── MONTHLY TREND ─────────────────────────────────────────────────────────────
-let currentTrend='overall';
-function showTrend(tab,btn){currentTrend=tab;document.querySelectorAll('#trend-tabs .itab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rebuildTrend();}
+// ── TREND ─────────────────────────────────────────────────────────────────────
+let currentTrendTab='all';
+function sti(tab,btn){currentTrendTab=tab;document.querySelectorAll('#tr-tabs .itab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');refTrend();}
 
-function rebuildTrend(){
+function refTrend(){
   if(!DB.months.length)return;
-  const m0=DB.m0Index;
-  const m0Label=m0>=0?DB.months[m0]:'not set';
-  document.getElementById('trend-m0-tag').textContent='M0: '+m0Label;
+  const m0=DB.m0Idx;
+  const m0Label=m0>=0&&DB.months[m0]?DB.months[m0]:'not set';
+  document.getElementById('tr-m0tag').textContent='M0: '+m0Label;
+  const labels=DB.months.map((m,i)=>{const o=i-m0;return o<0?`M${o}`:o===0?'M0':`M+${o}`;});
+  const baseOpts={scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}}},
+    plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}};
 
-  const labels=DB.months.map((m,i)=>{const off=i-m0;return off<0?`M${off}`:off===0?'M0':`M+${off}`;});
-  const m0Annot=m0>=0?{annotation:{annotations:{m0:{type:'line',xMin:m0,xMax:m0,borderColor:'rgba(244,106,30,.5)',borderWidth:2,borderDash:[4,4]}}}}:{};
+  // Main: treatment vs control
+  mc('tr-main','line',{labels,datasets:[
+    {label:'≥50% Treatment',data:DB.trend.treat,borderColor:'#1A7A4A',backgroundColor:'rgba(26,122,74,.07)',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:'#1A7A4A',spanGaps:true,borderWidth:2.5},
+    {label:'<50% Control',data:DB.trend.ctrl,borderColor:'#E84C3D',backgroundColor:'rgba(232,76,61,.06)',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:'#E84C3D',spanGaps:true,borderDash:[5,3]},
+    {label:'Overall',data:DB.trend.overall,borderColor:'#162d50',backgroundColor:'transparent',tension:.4,pointRadius:2,spanGaps:true,borderDash:[2,2]},
+  ]},baseOpts);
 
-  const titlesMap={'overall':'Overall avg','s0':'0–30% slab','s1':'30–50% slab','s2':'50–75% slab','s3':'>75% slab'};
-  document.getElementById('trend-title').textContent='Monthly Disbursement — '+titlesMap[currentTrend];
-
-  const colors={overall:'#0B1F3A',s0:'#E84C3D',s1:'#E8943D',s2:'#3D9BE8',s3:'#1A7A4A'};
-  const bgs={overall:'rgba(11,31,58,.06)',s0:'rgba(232,76,61,.1)',s1:'rgba(232,148,61,.1)',s2:'rgba(61,155,232,.1)',s3:'rgba(26,122,74,.1)'};
-  const data=DB.slabMonthly[currentTrend];
-
-  mkChart('trend-chart','line',{labels,datasets:[{label:"Avg Disb (INR '000)",data,borderColor:colors[currentTrend],backgroundColor:bgs[currentTrend],tension:.4,fill:true,pointRadius:4,pointBackgroundColor:colors[currentTrend],spanGaps:true}]},{scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}}},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
-
-  // All slabs comparison
-  mkChart('trend-all','line',{labels,datasets:['overall','s0','s1','s2','s3'].map((k,i)=>({
-    label:['Overall','0–30%','30–50%','50–75%','>75%'][i],
-    data:DB.slabMonthly[k],
-    borderColor:[colors.overall,...SLAB_COLORS][i],
-    backgroundColor:'transparent',
-    tension:.4,pointRadius:3,spanGaps:true,
-    borderDash:k==='overall'?[5,3]:[],
-  }))},{scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}}},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}}});
-
-  // Trend table
-  const t=document.getElementById('trend-table');
-  t.innerHTML=`<thead><tr><th>Month</th><th class="num">Overall (₹'000)</th><th class="num" style="color:#E84C3D">0–30%</th><th class="num" style="color:#E8943D">30–50%</th><th class="num" style="color:#3D9BE8">50–75%</th><th class="num" style="color:#1A7A4A">>75%</th></tr></thead><tbody>`;
+  // Data table
+  const mdt=document.getElementById('tr-main-dt');
+  mdt.innerHTML=`<thead><tr><th>Month</th><th class="num">≥50% Treatment</th><th class="num">&lt;50% Control</th><th class="num">Overall</th><th class="num">Gap (T−C)</th></tr></thead><tbody>`;
   DB.months.forEach((m,i)=>{
-    const off=i-m0;const lbl=off<0?`M${off}`:off===0?'M0 (Training)':(`M+${off}`);
-    const style=off===0?'background:var(--orange-lt);font-weight:600':'';
-    t.innerHTML+=`<tr style="${style}"><td>${lbl} (${m})</td>${['overall','s0','s1','s2','s3'].map(k=>`<td class="num">${DB.slabMonthly[k][i]!==null?DB.slabMonthly[k][i].toFixed(2):'—'}</td>`).join('')}</tr>`;
+    const o=i-m0;const lbl=o<0?`M${o}`:o===0?'M0 ★':`M+${o}`;
+    const tr=DB.trend.treat[i];const ct=DB.trend.ctrl[i];const ov=DB.trend.overall[i];
+    const gap=tr&&ct?parseFloat((tr-ct).toFixed(2)):null;
+    const style=o===0?'background:var(--orange-lt)':'';
+    mdt.innerHTML+=`<tr style="${style}"><td>${lbl} (${m})</td><td class="num">${tr?.toFixed(2)||'—'}</td><td class="num">${ct?.toFixed(2)||'—'}</td><td class="num">${ov?.toFixed(2)||'—'}</td><td class="num ${gap>0?'pos':''}">${gap!==null?(gap>0?'+':'')+gap:'—'}</td></tr>`;
   });
-  t.innerHTML+=`</tbody>`;
+  mdt.innerHTML+='</tbody>';
+
+  // All slabs tab
+  if(currentTrendTab==='all'){
+    mc('tr-all','line',{labels,datasets:[
+      {label:'Overall',data:DB.trend.overall,borderColor:'#162d50',borderDash:[4,3],tension:.4,pointRadius:2,spanGaps:true,backgroundColor:'transparent'},
+      {label:'0–30%',data:DB.trend.s0,borderColor:'#E84C3D',tension:.4,pointRadius:3,spanGaps:true,backgroundColor:'transparent'},
+      {label:'30–50%',data:DB.trend.s1,borderColor:'#E8943D',tension:.4,pointRadius:3,spanGaps:true,backgroundColor:'transparent'},
+      {label:'50–75%',data:DB.trend.s2,borderColor:'#3D9BE8',tension:.4,pointRadius:3,spanGaps:true,backgroundColor:'transparent'},
+      {label:'>75%',data:DB.trend.s3,borderColor:'#1A7A4A',tension:.4,pointRadius:3,spanGaps:true,backgroundColor:'transparent',borderWidth:2.5},
+    ]},baseOpts);
+  }else{
+    const keyMap={s0:'s0',s1:'s1',s2:'s2',s3:'s3'};
+    const labelMap={s0:'0–30%',s1:'30–50%',s2:'50–75%',s3:'>75%'};
+    const colorMap={s0:'#E84C3D',s1:'#E8943D',s2:'#3D9BE8',s3:'#1A7A4A'};
+    const k=keyMap[currentTrendTab];
+    mc('tr-all','line',{labels,datasets:[{
+      label:labelMap[k],data:DB.trend[k],borderColor:colorMap[k],
+      backgroundColor:SLAB_LIGHT[['s0','s1','s2','s3'].indexOf(k)],
+      tension:.4,fill:true,pointRadius:4,pointBackgroundColor:colorMap[k],spanGaps:true
+    }]},baseOpts);
+  }
 }
 
 // ── VIEW + DL BAR ─────────────────────────────────────────────────────────────
-const DL_BARS={
-  'upload':'<span class="dl-lbl">Upload your CRAFT v5 Excel file to get started</span>',
-  'overview':`<span class="dl-lbl">Download</span>
-    <button class="dl-btn primary" onclick="dlTabPDF('view-overview','Overview')">⬇ Full PDF</button>
-    <button class="dl-btn" onclick="dlChart('ov-pie','Slab_Dist')">⬇ Pie PNG</button>
-    <button class="dl-btn" onclick="dlChart('ov-bar-tgt','Achievement')">⬇ Ach PNG</button>
-    <button class="dl-btn" onclick="dlChart('ov-bar-exit','Exits')">⬇ Exits PNG</button>
-    <button class="dl-btn" onclick="dlBranchCSV()">⬇ Branch CSV</button>`,
-  'performance':`<span class="dl-lbl">Download</span>
-    <button class="dl-btn primary" onclick="dlTabPDF('view-performance','Performance')">⬇ Full PDF</button>
-    <button class="dl-btn" onclick="dlChart('pf-ach','Achievement')">⬇ Ach PNG</button>
-    <button class="dl-btn" onclick="dlChart('pf-gradient','Gradient')">⬇ Gradient PNG</button>
-    <button class="dl-btn" onclick="dlChart('pf-prepost','Pre_Post')">⬇ Pre/Post PNG</button>
-    <button class="dl-btn" onclick="dlPerfCSV()">⬇ Table CSV</button>`,
-  'roi':`<span class="dl-lbl">Download</span>
-    <button class="dl-btn exec" onclick="dlExecPDF()">⬇ Executive PDF</button>
-    <button class="dl-btn primary" onclick="dlTabPDF('view-roi','ROI_Summary')">⬇ Full PDF</button>
-    <button class="dl-btn" onclick="dlROIExcel()">⬇ Excel</button>
-    <button class="dl-btn" onclick="dlChart('roi-bar','ROI')">⬇ ROI PNG</button>
-    <button class="dl-btn" onclick="dlChart('roi-doughnut','Components')">⬇ Components PNG</button>`,
-  'geography':`<span class="dl-lbl">Download</span>
-    <button class="dl-btn primary" onclick="dlTabPDF('view-geography','Geography')">⬇ Full PDF</button>
-    <button class="dl-btn" onclick="dlChart('geo-slab','Slab_Profile')">⬇ Slab PNG</button>
-    <button class="dl-btn" onclick="dlChart('geo-ach','Achievement')">⬇ Ach PNG</button>
-    <button class="dl-btn" onclick="dlGeoCSV()">⬇ Branch CSV</button>`,
-  'trend':`<span class="dl-lbl">Download</span>
-    <button class="dl-btn primary" onclick="dlTabPDF('view-trend','Monthly_Trend')">⬇ Full PDF</button>
-    <button class="dl-btn" onclick="dlChart('trend-chart','Trend')">⬇ Trend PNG</button>
-    <button class="dl-btn" onclick="dlChart('trend-all','All_Slabs')">⬇ All Slabs PNG</button>
-    <button class="dl-btn" onclick="dlTrendCSV()">⬇ Trend CSV</button>`,
+const DLBARS={
+  upload:'<span class="dll">Upload the CRAFT Standard Template to get started</span>',
+  overview:`<span class="dll">Download</span>
+    <button class="dlb p" onclick="dlTabPDF('view-overview','Overview')">⬇ Full PDF</button>
+    <button class="dlb" onclick="dlc('ov-compl','Completion_Attrition')">⬇ Chart PNG</button>
+    <button class="dlb" onclick="dlTabCSV('branches')">⬇ Branch CSV</button>`,
+  performance:`<span class="dll">Download</span>
+    <button class="dlb p" onclick="dlTabPDF('view-performance','Performance')">⬇ Full PDF</button>
+    <button class="dlb" onclick="dlc('pf-ach','Achievement')">⬇ Ach PNG</button>
+    <button class="dlb" onclick="dlc('pf-grad','Gradient')">⬇ Gradient PNG</button>
+    <button class="dlb" onclick="dlc('pf-pp','Pre_Post')">⬇ Pre/Post PNG</button>`,
+  roi:`<span class="dll">Download</span>
+    <button class="dlb e" onclick="dlExecPDF()">⬇ Executive PDF</button>
+    <button class="dlb p" onclick="dlTabPDF('view-roi','ROI_Summary')">⬇ Full PDF</button>
+    <button class="dlb" onclick="dlTabCSV('roi')">⬇ ROI CSV</button>
+    <button class="dlb" onclick="dlc('roi-bar','ROI')">⬇ ROI PNG</button>`,
+  geography:`<span class="dll">Download</span>
+    <button class="dlb p" onclick="dlTabPDF('view-geography','Geography')">⬇ Full PDF</button>
+    <button class="dlb" onclick="dlc('geo-tc','Treatment_Control')">⬇ T/C PNG</button>
+    <button class="dlb" onclick="dlTabCSV('branches')">⬇ Branch CSV</button>`,
+  trend:`<span class="dll">Download</span>
+    <button class="dlb p" onclick="dlTabPDF('view-trend','Trend')">⬇ Full PDF</button>
+    <button class="dlb" onclick="dlc('tr-main','Treatment_vs_Control')">⬇ Trend PNG</button>
+    <button class="dlb" onclick="dlTabCSV('trend')">⬇ Trend CSV</button>`,
 };
 
-function showView(id,btn){
+function sv(id,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
   btn.classList.add('active');
-  document.getElementById('dl-bar').innerHTML=DL_BARS[id]||'';
-  if(DB.branches.length){refreshAll();}
+  document.getElementById('dlbar').innerHTML=DLBARS[id]||'';
+  if(DB.branches.length)refAll();
 }
 
-function refreshAll(){
-  refreshOverview();refreshPerformance();refreshROI();refreshGeo();rebuildTrend();
-}
+function refAll(){refOverview();refPerformance();refROI();refGeo();refTrend();}
 
 // ── DOWNLOADS ─────────────────────────────────────────────────────────────────
-function dlChart(canvasId,name){
+function dlc(canvasId,name){
   const c=document.getElementById(canvasId);if(!c){toast('Chart not found');return;}
   c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`CRAFT_${name}_${today()}.png`;a.click();toast('✓ PNG downloaded');},'image/png');
 }
 async function dlTabPDF(viewId,name){
-  toast('Preparing PDF...',4000);
+  toast('Preparing PDF...',5000);
   try{
     const el=document.getElementById(viewId);
-    const canvas=await html2canvas(el,{scale:1.5,useCORS:true,backgroundColor:'#F4F2EE'});
+    const canvas=await html2canvas(el,{scale:1.4,useCORS:true,backgroundColor:'#F4F2EE'});
     const imgData=canvas.toDataURL('image/png');
     const{jsPDF}=window.jspdf;
     const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
     const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
-    pdf.setFillColor(11,31,58);pdf.rect(0,0,pw,14,'F');
-    pdf.setTextColor(244,106,30);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('CRAFT ROI Tracker v5',10,9);
+    pdf.setFillColor(11,31,58);pdf.rect(0,0,pw,13,'F');
+    pdf.setTextColor(244,106,30);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('CRAFT ROI Tracker v6',10,8.5);
     pdf.setTextColor(255,255,255);pdf.setFont('helvetica','normal');pdf.setFontSize(9);
-    pdf.text(vs('d-prog-name')||DB.fileName||'',60,9);
-    pdf.setTextColor(160,160,160);pdf.text(today(),pw-10,9,{align:'right'});
-    const ratio=canvas.width/canvas.height;
-    let w=pw-20,h=w/ratio;if(h>ph-22){h=ph-22;w=h*ratio;}
-    pdf.addImage(imgData,'PNG',10,16,w,h);
+    pdf.text(vs('d-prog')||DB.fileName||'',60,8.5);
+    pdf.setTextColor(150,150,150);pdf.text(today(),pw-10,8.5,{align:'right'});
+    const ratio=canvas.width/canvas.height;let w=pw-20,h=w/ratio;if(h>ph-21){h=ph-21;w=h*ratio;}
+    pdf.addImage(imgData,'PNG',10,15,w,h);
     pdf.setFillColor(244,106,30);pdf.rect(0,ph-8,pw,8,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(8);
     pdf.text('C.R.A.F.T Academia Pvt. Ltd. | Mumbai | team@craftacademia.in',10,ph-3);
-    pdf.text('Powered by CRAFT ROI Tracker v5',pw-10,ph-3,{align:'right'});
-    pdf.save(`CRAFT_${name}_${today()}.pdf`);
-    toast('✓ PDF downloaded');
+    pdf.text('Powered by CRAFT ROI Tracker v6',pw-10,ph-3,{align:'right'});
+    pdf.save(`CRAFT_${name}_${today()}.pdf`);toast('✓ PDF downloaded');
   }catch(e){toast('PDF error: '+e.message);}
 }
 async function dlExecPDF(){
-  toast('Building Executive PDF...',5000);
+  toast('Building Executive PDF...',6000);
   if(!DB.branches.length){toast('Upload data first');return;}
-  const tots=getSlabTotals();
-  const fee=v('d-fee'),repl=v('d-repl');
-  const totalEmp=DB.branches.reduce((a,b)=>a+b.emp,0);
-  const avgSal=DB.branches.reduce((a,b)=>a+b.salary*b.emp,0)/Math.max(totalEmp,1);
-  const m0Label=DB.m0Index>=0?DB.months[DB.m0Index]:'—';
+  const t=getTotals();
+  const fee=v('d-fee'),sal=v('d-sal'),repl=v('d-repl'),yld=v('d-yield')/100;
+  const pp=getPrePost();
+  const ctrlDrift=pp?Math.max(0,pp.ctrl.post-pp.ctrl.pre):0;
+  const attrDelta=pp?Math.max(0,(pp.treat.post-pp.treat.pre)-ctrlDrift):0;
+  const incrDisb=attrDelta*t.treatEmp*1000*12;
+  const netRev=incrDisb*yld;
+  const attrSaved=DB.exits.total*repl;
+  const totalReturn=netRev+attrSaved;
+  const totalInvest=fee+t.emp*sal*(10/160);
+  const roi=totalInvest>0?Math.round((totalReturn-totalInvest)/totalInvest*100):0;
   const{jsPDF}=window.jspdf;
   const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
-
-  pdf.setFillColor(11,31,58);pdf.rect(0,0,pw,52,'F');
-  pdf.setFillColor(244,106,30);pdf.rect(0,52,pw,3,'F');
+  // Header
+  pdf.setFillColor(11,31,58);pdf.rect(0,0,pw,50,'F');
+  pdf.setFillColor(244,106,30);pdf.rect(0,50,pw,3,'F');
   pdf.setTextColor(244,106,30);pdf.setFontSize(20);pdf.setFont('helvetica','bold');pdf.text('CRAFT',14,20);
-  pdf.setTextColor(255,255,255);pdf.setFontSize(14);pdf.text(' ROI Tracker',14+28,20);
-  pdf.setTextColor(249,169,122);pdf.setFontSize(9);pdf.setFont('helvetica','normal');pdf.text('Training Return on Investment — Executive Summary',14,30);
-  pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');pdf.text(vs('d-prog-name')||'Training Programme',14,42);
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9);pdf.setTextColor(160,160,160);
-  pdf.text(`Training Month: ${m0Label}   |   Total Cohort: ${totalEmp}   |   Branches: ${DB.branches.length}   |   Date: ${today()}`,14,49);
-
+  pdf.setTextColor(255,255,255);pdf.setFontSize(14);pdf.text(' ROI Tracker',42,20);
+  pdf.setTextColor(249,169,122);pdf.setFontSize(9);pdf.setFont('helvetica','normal');pdf.text('Training Return on Investment — Executive Summary',14,29);
+  pdf.setTextColor(255,255,255);pdf.setFontSize(11);pdf.setFont('helvetica','bold');pdf.text(vs('d-prog')||'Training Programme',14,40);
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(160,160,160);
+  pdf.text(`M0: ${DB.months[DB.m0Idx]||'—'}  |  Cohort: ${t.emp}  |  Treatment: ${t.treatEmp}  |  Date: ${today()}`,14,47);
   // KPIs
-  const overallAch=DB.branches.reduce((a,b)=>a+b.achOverall*b.emp,0)/Math.max(totalEmp,1);
-  const totalExits=DB.exits.total;
-  const attrSaved=totalExits*repl;
-  const kpiY=62;const kpiW=(pw-28)/4;
-  [{l:'TOTAL COHORT',v:String(totalEmp)+' emp',c:[11,31,58]},{l:'TOTAL EXITS',v:String(totalExits)+' exits',c:[192,57,43]},{l:'OVERALL ACH %',v:pct(overallAch),c:[26,122,74]},{l:'ATTRITION SAVED',v:fmtINR(attrSaved),c:[244,106,30]}].forEach((k,i)=>{
-    const x=14+i*kpiW;
-    pdf.setFillColor(...k.c);pdf.roundedRect(x,kpiY,kpiW-4,22,2,2,'F');
-    pdf.setTextColor(255,255,255);pdf.setFontSize(7);pdf.setFont('helvetica','normal');pdf.text(k.l,x+4,kpiY+7);
-    pdf.setFontSize(13);pdf.setFont('helvetica','bold');pdf.text(k.v,x+4,kpiY+17);
+  const ky=60,kw=(pw-28)/4;
+  [{l:'TOTAL INVESTMENT',v:fINR(totalInvest),c:[11,31,58]},
+   {l:'NET REVENUE',v:fINR(netRev),c:[26,122,74]},
+   {l:'OVERALL ROI',v:roi+'%',c:[244,106,30]},
+   {l:'ATTRITION SAVED',v:fINR(attrSaved),c:[26,122,74]}
+  ].forEach((k,i)=>{
+    const x=14+i*kw;
+    pdf.setFillColor(...k.c);pdf.roundedRect(x,ky,kw-4,20,2,2,'F');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(7);pdf.setFont('helvetica','normal');pdf.text(k.l,x+3,ky+7);
+    pdf.setFontSize(12);pdf.setFont('helvetica','bold');pdf.text(k.v,x+3,ky+15);
   });
-
-  // Slab table
-  const tY=kpiY+30;
-  pdf.setTextColor(11,31,58);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('Performance by Completion Slab',14,tY);
-  const colW=[(pw-28)*0.28,(pw-28)*0.18,(pw-28)*0.18,(pw-28)*0.18,(pw-28)*0.18];
-  const hdrs=['Metric','0–30%','30–50%','50–75%','>75%'];
-  const slabColors=['E84C3D','E8943D','3D9BE8','1A7A4A'];
-  let ty=tY+5;let tx=14;
-  hdrs.forEach((h,ci)=>{
-    if(ci>0){const sc=slabColors[ci-1];pdf.setFillColor(parseInt(sc.slice(0,2),16),parseInt(sc.slice(2,4),16),parseInt(sc.slice(4,6),16));}
-    else pdf.setFillColor(11,31,58);
-    pdf.rect(tx,ty,colW[ci],8,'F');
-    pdf.setTextColor(255,255,255);pdf.setFontSize(7);pdf.setFont('helvetica','bold');pdf.text(h,tx+2,ty+5.5);tx+=colW[ci];
-  });ty+=8;
-  const rows=[
-    ['Employees',tots.s0.emp,tots.s1.emp,tots.s2.emp,tots.s3.emp],
-    ['Target Achievement',pct(tots.s0.ach),pct(tots.s1.ach),pct(tots.s2.ach),pct(tots.s3.ach)],
-    ['Attrition Exits',DB.exits.s0,DB.exits.s1,DB.exits.s2,DB.exits.s3],
-  ];
-  rows.forEach((r,ri)=>{tx=14;r.forEach((cell,ci)=>{
-    ri%2===0?pdf.setFillColor(244,242,238):pdf.setFillColor(255,255,255);
-    pdf.rect(tx,ty,colW[ci],7,'F');pdf.setDrawColor(221,217,210);pdf.rect(tx,ty,colW[ci],7,'S');
-    pdf.setTextColor(ci===0?11:51,ci===0?31:51,ci===0?58:51);pdf.setFontSize(7);pdf.setFont('helvetica',ci===0?'bold':'normal');
-    pdf.text(String(cell),tx+2,ty+4.8);tx+=colW[ci];
-  });ty+=7;});
-
+  // Branch table
+  let ty=ky+28;
+  pdf.setTextColor(11,31,58);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text('Branch Performance Summary',14,ty);ty+=5;
+  const bw=[(pw-28)*0.22,(pw-28)*0.12,(pw-28)*0.11,(pw-28)*0.11,(pw-28)*0.11,(pw-28)*0.11,(pw-28)*0.11,(pw-28)*0.11];
+  const bh=['Branch','Emp','0-30%','30-50%','50-75%','>75%','≥50% Ach%','<50% Ach%'];
+  let tx=14;
+  bh.forEach((h,ci)=>{pdf.setFillColor(11,31,58);pdf.rect(tx,ty,bw[ci],7,'F');pdf.setTextColor(255,255,255);pdf.setFontSize(7);pdf.setFont('helvetica','bold');pdf.text(h,tx+2,ty+5);tx+=bw[ci];});
+  ty+=7;
+  DB.branches.slice(0,12).forEach((b,bi)=>{
+    tx=14;
+    [b.branch,b.emp,b.s0,b.s1,b.s2,b.s3,pct(b.achTreat),pct(b.achCtrl)].forEach((cell,ci)=>{
+      bi%2===0?pdf.setFillColor(244,242,238):pdf.setFillColor(255,255,255);
+      pdf.rect(tx,ty,bw[ci],6,'F');pdf.setDrawColor(210,203,196);pdf.rect(tx,ty,bw[ci],6,'S');
+      pdf.setTextColor(ci===0?11:51,ci===0?31:51,ci===0?58:51);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
+      pdf.text(String(cell),tx+2,ty+4.2);tx+=bw[ci];
+    });ty+=6;
+  });
   // Trend chart
-  try{
-    const tc=document.getElementById('trend-chart');
-    if(tc){const img=tc.toDataURL('image/png');ty+=6;pdf.setTextColor(11,31,58);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text("Monthly Disbursement Trend (INR '000)",14,ty);pdf.addImage(img,'PNG',14,ty+3,pw-28,45);ty+=50;}
-  }catch(e){}
-
-  // Footer
-  ty+=6;
+  try{const tc=document.getElementById('tr-main');if(tc){ty+=6;const img=tc.toDataURL('image/png');pdf.setTextColor(11,31,58);pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.text("Treatment vs Control — Monthly Disbursement (INR '000)",14,ty);pdf.addImage(img,'PNG',14,ty+3,pw-28,42);ty+=46;}}catch(e){}
+  // Attribution note
+  ty+=4;
   pdf.setFillColor(253,232,216);pdf.roundedRect(14,ty,pw-28,12,2,2,'F');
   pdf.setFillColor(244,106,30);pdf.rect(14,ty,3,12,'F');
   pdf.setTextColor(122,58,18);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
-  const bestSlab=([tots.s0,tots.s1,tots.s2,tots.s3].reduce((a,b,i)=>b.ach>a.v?{v:b.ach,i}:a,{v:0,i:0}));
-  pdf.text(`Highest performing slab: ${SLAB_LABELS[bestSlab.i]} — ${pct(bestSlab.v)} achievement`,20,ty+7.5);
+  pdf.text(`Training attribution gap: +${pct(t.achTreat-t.achCtrl)} pp | ≥50% group ach: ${pct(t.achTreat)} vs <50% group: ${pct(t.achCtrl)}`,20,ty+7.5);
+  // Footer
+  pdf.setFillColor(11,31,58);pdf.rect(0,ph-11,pw,11,'F');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(8);pdf.setFont('helvetica','bold');pdf.text('C.R.A.F.T Academia Pvt. Ltd.',8,ph-5);
+  pdf.setFont('helvetica','normal');pdf.setTextColor(150,150,150);pdf.text('Mumbai | team@craftacademia.in',55,ph-5);
+  pdf.setTextColor(244,106,30);pdf.text('Powered by CRAFT ROI Tracker v6',pw-10,ph-5,{align:'right'});
+  pdf.save(`CRAFT_Executive_ROI_${today()}.pdf`);toast('✓ Executive PDF downloaded');
+}
 
-  pdf.setFillColor(11,31,58);pdf.rect(0,ph-12,pw,12,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(8);pdf.setFont('helvetica','bold');pdf.text('C.R.A.F.T Academia Pvt. Ltd.',8,ph-5.5);
-  pdf.setFont('helvetica','normal');pdf.setTextColor(160,160,160);pdf.text('Mumbai | team@craftacademia.in',60,ph-5.5);
-  pdf.setTextColor(244,106,30);pdf.text('Powered by CRAFT ROI Tracker v5',pw-10,ph-5.5,{align:'right'});
-  pdf.save(`CRAFT_Executive_ROI_${today()}.pdf`);
-  toast('✓ Executive PDF downloaded');
-}
-function dlROIExcel(){
-  if(!DB.branches.length){toast('Upload data first');return;}
-  const tots=getSlabTotals();
-  const rows=[['CRAFT ROI Tracker v5 — ROI Breakdown'],['Programme',vs('d-prog-name')],['Date',today()],[]];
-  rows.push(['Slab','Employees','Ach %','Attrition Exits','Attrition Saved (INR)','CRAFT Fee Share (INR)','Total Investment (INR)','ROI %']);
-  const fee=v('d-fee'),repl=v('d-repl');
-  const totalEmp=DB.branches.reduce((a,b)=>a+b.emp,0);
-  const avgSal=DB.branches.reduce((a,b)=>a+b.salary*b.emp,0)/Math.max(totalEmp,1);
-  [tots.s0,tots.s1,tots.s2,tots.s3].forEach((t,i)=>{
-    const sf=totalEmp>0?(t.emp/totalEmp)*fee:0;
-    const tc=t.emp*avgSal*(10/160);
-    const ti=sf+tc;
-    const as=t.exit*repl;
-    const roi=ti>0?Math.round((as-ti)/ti*100):0;
-    rows.push([SLAB_LABELS[i],t.emp,pct(t.ach),t.exit,Math.round(as),Math.round(sf),Math.round(ti),roi+'%']);
-  });
-  const ws=XLSX.utils.aoa_to_sheet(rows);
-  const wb2=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb2,ws,'ROI Breakdown');
-  XLSX.writeFile(wb2,`CRAFT_ROI_${today()}.xlsx`);
-  toast('✓ Excel downloaded');
-}
-function dl(content,filename,type){const b=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;a.click();}
-function dlBranchCSV(){
-  let csv='Branch,Region,Employees,Avg Salary,0-30%,30-50%,50-75%,>75%,Ach%\n';
-  DB.branches.forEach(b=>csv+=`${b.branch},${b.region},${b.emp},${b.salary},${b.s0},${b.s1},${b.s2},${b.s3},${pct(b.achOverall)}\n`);
-  dl(csv,`CRAFT_Branches_${today()}.csv`,'text/csv');toast('✓ CSV downloaded');
-}
-function dlPerfCSV(){
-  const tots=getSlabTotals();
-  let csv='Slab,Employees,Achievement %,Exits\n';
-  [tots.s0,tots.s1,tots.s2,tots.s3].forEach((t,i)=>csv+=`${SLAB_LABELS[i]},${t.emp},${pct(t.ach)},${t.exit}\n`);
-  dl(csv,`CRAFT_Performance_${today()}.csv`,'text/csv');toast('✓ CSV downloaded');
-}
-function dlGeoCSV(){dlBranchCSV();}
-function dlTrendCSV(){
-  let csv='Month,Label,Overall,0-30%,30-50%,50-75%,>75%\n';
-  DB.months.forEach((m,i)=>{
-    const off=i-DB.m0Index;const lbl=off<0?`M${off}`:off===0?'M0':`M+${off}`;
-    csv+=`${m},${lbl},${DB.slabMonthly.overall[i]?.toFixed(2)||''},${DB.slabMonthly.s0[i]?.toFixed(2)||''},${DB.slabMonthly.s1[i]?.toFixed(2)||''},${DB.slabMonthly.s2[i]?.toFixed(2)||''},${DB.slabMonthly.s3[i]?.toFixed(2)||''}\n`;
-  });
-  dl(csv,`CRAFT_Monthly_Trend_${today()}.csv`,'text/csv');toast('✓ CSV downloaded');
+function dl(content,filename,type='text/csv'){const b=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;a.click();}
+
+function dlTabCSV(type){
+  if(type==='branches'){
+    let csv='Branch,Region,Active,0-30%,30-50%,50-75%,>75%,Overall Ach%,>=50% Ach%,<50% Ach%,Exits\n';
+    DB.branches.forEach(b=>csv+=`${b.branch},${b.region},${b.emp},${b.s0},${b.s1},${b.s2},${b.s3},${pct(b.achAll)},${pct(b.achTreat)},${pct(b.achCtrl)},${b.exits}\n`);
+    dl(csv,`CRAFT_Branches_${today()}.csv`);toast('✓ CSV downloaded');
+  }else if(type==='roi'){
+    const t=getTotals();const pp=getPrePost();
+    const yld=v('d-yield')/100;const repl=v('d-repl');
+    let csv='CRAFT ROI Tracker v6 — ROI Summary\n\n';
+    csv+='Group,Employees,Overall Ach%,Treatment Ach%,Control Ach%,Attribution Gap\n';
+    csv+=`Treatment (>=50%),${t.treatEmp},${pct(t.achAll)},${pct(t.achTreat)},${pct(t.achCtrl)},+${pct(t.achTreat-t.achCtrl)} pp\n\n`;
+    csv+='ROI Chain\n';
+    if(pp){
+      const cd=Math.max(0,pp.ctrl.post-pp.ctrl.pre);
+      const ad=Math.max(0,(pp.treat.post-pp.treat.pre)-cd);
+      const id=ad*t.treatEmp*1000*12;
+      const nr=id*yld;
+      const as=DB.exits.total*repl;
+      csv+=`Pre-training disb (treatment),${pp.treat.pre.toFixed(2)} INR 000\n`;
+      csv+=`Post-training disb (treatment),${pp.treat.post.toFixed(2)} INR 000\n`;
+      csv+=`Control drift,${cd.toFixed(2)} INR 000\n`;
+      csv+=`Attribution-adjusted delta,${ad.toFixed(2)} INR 000\n`;
+      csv+=`Annual incremental disbursement,${fINR(id)}\n`;
+      csv+=`Net revenue @ ${v('d-yield')}% yield,${fINR(nr)}\n`;
+      csv+=`Attrition saved,${fINR(as)}\n`;
+    }
+    dl(csv,`CRAFT_ROI_${today()}.csv`);toast('✓ CSV downloaded');
+  }else if(type==='trend'){
+    let csv='Month,Label,Overall,>=50% Treatment,<50% Control,0-30%,30-50%,50-75%,>75%\n';
+    DB.months.forEach((m,i)=>{
+      const o=i-DB.m0Idx;const lbl=o<0?`M${o}`:o===0?'M0':`M+${o}`;
+      csv+=`${m},${lbl},${DB.trend.overall[i]?.toFixed(2)||''},${DB.trend.treat[i]?.toFixed(2)||''},${DB.trend.ctrl[i]?.toFixed(2)||''},${DB.trend.s0[i]?.toFixed(2)||''},${DB.trend.s1[i]?.toFixed(2)||''},${DB.trend.s2[i]?.toFixed(2)||''},${DB.trend.s3[i]?.toFixed(2)||''}\n`;
+    });
+    dl(csv,`CRAFT_Trend_${today()}.csv`);toast('✓ CSV downloaded');
+  }
 }
 
 // ── PERSISTENCE ───────────────────────────────────────────────────────────────
 let saveTimer=null;
 function autoSave(){
-  clearTimeout(saveTimer);saveTimer=setTimeout(()=>{
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
     try{
-      const state={inputs:{prog:vs('d-prog-name'),m0:vs('d-m0-month'),fee:vs('d-fee'),repl:vs('d-repl'),reg:vs('d-reg'),regc:vs('d-reg-cost'),compn:vs('d-comp-n'),compc:vs('d-comp-cost')},db:DB};
+      const state={
+        inputs:{prog:vs('d-prog'),m0:vs('d-m0'),fee:vs('d-fee'),sal:vs('d-sal'),repl:vs('d-repl'),
+                yld:vs('d-yield'),reg:vs('d-reg'),regc:vs('d-regc'),comp:vs('d-comp'),compc:vs('d-compc')},
+        db:DB
+      };
       localStorage.setItem(LS_KEY,JSON.stringify(state));setSaveDot(true);
     }catch(e){setSaveDot(false);}
-  },800);
+  },700);
 }
-function setSaveDot(ok){document.getElementById('save-dot').style.background=ok?'#1A7A4A':'#E84C3D';}
+
 function loadFromLS(){
   try{
     const raw=localStorage.getItem(LS_KEY);if(!raw)return;
     const state=JSON.parse(raw);
     if(state.inputs){
       const inp=state.inputs;
-      document.getElementById('d-prog-name').value=inp.prog||'';
+      document.getElementById('d-prog').value=inp.prog||'';
       document.getElementById('d-fee').value=inp.fee||'';
+      document.getElementById('d-sal').value=inp.sal||'';
       document.getElementById('d-repl').value=inp.repl||'';
+      document.getElementById('d-yield').value=inp.yld||'4';
       document.getElementById('d-reg').value=inp.reg||'0';
-      document.getElementById('d-reg-cost').value=inp.regc||'0';
-      document.getElementById('d-comp-n').value=inp.compn||'0';
-      document.getElementById('d-comp-cost').value=inp.compc||'0';
+      document.getElementById('d-regc').value=inp.regc||'0';
+      document.getElementById('d-comp').value=inp.comp||'0';
+      document.getElementById('d-compc').value=inp.compc||'0';
     }
     if(state.db&&state.db.branches&&state.db.branches.length){
       DB=state.db;
-      buildMonthDropdown();
-      document.getElementById('d-m0-month').value=state.inputs.m0||'';
-      DB.m0Index=parseInt(state.inputs.m0)||0;
+      buildM0Dropdown();
+      document.getElementById('d-m0').value=state.inputs.m0||'';
+      DB.m0Idx=parseInt(state.inputs.m0)||0;
       showPreview();
-      document.getElementById('generate-btn').disabled=false;
-      document.getElementById('generate-btn').textContent='Generate Dashboard →';
-      document.getElementById('file-name').textContent=DB.fileName||'Saved data';
-      showStatus('✓ Previous session data restored','success');
+      document.getElementById('genbtn').disabled=false;
+      document.getElementById('genbtn').textContent='→ Generate Dashboard';
+      document.getElementById('fname').textContent=DB.fileName||'Saved session';
+      showSt('✓ Previous session restored — click Generate to reload dashboard','ok');
       setSaveDot(true);
     }
   }catch(e){}
 }
+
 function shareURL(){
-  const state={prog:vs('d-prog-name'),m0:vs('d-m0-month'),fee:vs('d-fee'),repl:vs('d-repl')};
+  const state={prog:vs('d-prog'),m0:vs('d-m0'),fee:vs('d-fee'),sal:vs('d-sal'),repl:vs('d-repl'),yld:vs('d-yield')};
   try{
-    const encoded=btoa(encodeURIComponent(JSON.stringify(state)));
-    const url=window.location.href.split('?')[0]+'?params='+encoded;
-    navigator.clipboard.writeText(url).then(()=>toast('✓ Share URL copied — note: file data not included in URL'));
+    const enc=btoa(encodeURIComponent(JSON.stringify(state)));
+    const url=location.href.split('?')[0]+'?p='+enc;
+    navigator.clipboard.writeText(url).then(()=>toast('✓ Share URL copied (inputs only — re-upload file to restore data)'));
   }catch(e){toast('Could not copy URL');}
 }
 function resetAll(){if(!confirm('Reset all data?'))return;localStorage.removeItem(LS_KEY);location.reload();}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-document.getElementById('dl-bar').innerHTML=DL_BARS['upload'];
+document.getElementById('dlbar').innerHTML=DLBARS['upload'];
 loadFromLS();
 </script>
 </body>
